@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+
+  authDB:
+    image: postgres:15.0-alpine
+    container_name: authDB
+    networks:
+      - microtest
+    environment:
+      POSTGRES_DB: ${AUTHDB_DB}
+      POSTGRES_USER: ${AUTHDB_USER}
+      POSTGRES_PASSWORD: ${AUTHDB_PASSWORD}
+      POSTGRES_HOST: ${AUTHDB_HOST}
+    volumes:
+      - authDB_data1:/data/postgres
+      - authDB_data2:/var/lib/postgresql/data
+
+  micDbAdmin:
+    image: dpage/pgadmin4:6.15
+    container_name: micDbAdmin
+    restart: always
+    environment:
+      PGDATA: ${PGDATA}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "127.0.0.1:5050:80"
+    networks:
+      - microtest
+    depends_on:
+      - authDB
+    volumes:
+      - micDbAdmin:/var/lib/pgadmin
+
+  auth-api:
+    build:
+      context: ./Accounts
+    command: sh -c "/root/.local/bin/poetry run python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - type: bind
+        source: ./Accounts
+        target: /project
+    depends_on:
+      - micDbAdmin
+      - authDB
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      DJ_ENVIRONMENT: ${DJ_ENVIRONMENT}
+      DJ_KEY_AUTH: ${DJ_KEY_AUTH}
+      DEFAULT_DB_NAME: ${AUTHDB_DB}
+      DEFAULT_DB_USER: ${AUTHDB_USER}
+      DEFAULT_DB_PASSWORD: ${AUTHDB_PASSWORD}
+      DEFAULT_DB_HOST: ${AUTHDB_HOST}
+      DEFAULT_DB_PORT: ${AUTHDB_PORT}
+    networks:
+      - microtest
+
+networks:
+  microtest:
+    driver: bridge
+
+volumes:
+  authDB_data1:
+  authDB_data2:
+  micDbAdmin:
