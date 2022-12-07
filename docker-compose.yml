@@ -1,24 +1,9 @@
 version: "3.9"
 
 services:
-
-  authDB:
-    image: postgres:15.0-alpine
-    container_name: authDB
-    networks:
-      - microtest
-    environment:
-      POSTGRES_DB: ${AUTHDB_DB}
-      POSTGRES_USER: ${AUTHDB_USER}
-      POSTGRES_PASSWORD: ${AUTHDB_PASSWORD}
-      POSTGRES_HOST: ${AUTHDB_HOST}
-    volumes:
-      - authDB_data1:/data/postgres
-      - authDB_data2:/var/lib/postgresql/data
-
-  micDbAdmin:
-    image: dpage/pgadmin4:6.15
-    container_name: micDbAdmin
+  pgadminMicro:
+    image: truecharts/pgadmin4:6.17.0
+    container_name: pgadminMicro
     restart: always
     environment:
       PGDATA: ${PGDATA}
@@ -29,40 +14,56 @@ services:
     networks:
       - microtest
     depends_on:
-      - authDB
+      - accountDB
     volumes:
-      - micDbAdmin:/var/lib/pgadmin
+      - pgadminMicro:/var/lib/pgadmin
 
-  auth-api:
+
+  account:
     build:
       context: ./Accounts
-    command: sh -c "/root/.local/bin/poetry run python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "/project/run.sh"
     volumes:
       - type: bind
         source: ./Accounts
         target: /project
     depends_on:
-      - micDbAdmin
-      - authDB
+      - accountDB
     ports:
       - "127.0.0.1:8000:8000"
     environment:
       DJ_ENVIRONMENT: ${DJ_ENVIRONMENT}
       DJ_KEY_AUTH: ${DJ_KEY_AUTH}
       DEBUG: ${DEBUG}
-      DEFAULT_DB_NAME: ${AUTHDB_DB}
-      DEFAULT_DB_USER: ${AUTHDB_USER}
-      DEFAULT_DB_PASSWORD: ${AUTHDB_PASSWORD}
-      DEFAULT_DB_HOST: ${AUTHDB_HOST}
-      DEFAULT_DB_PORT: ${AUTHDB_PORT}
+      DEFAULT_DB_NAME: ${ACCOUNT_DB}
+      DEFAULT_DB_USER: ${ACCOUNT_USER}
+      DEFAULT_DB_PASSWORD: ${ACCOUNT_PASSWORD}
+      DEFAULT_DB_HOST: ${ACCOUNT_HOST}
+      DEFAULT_DB_PORT: ${ACCOUNT_PORT}
     networks:
       - microtest
+
+
+  accountDB:
+    image: postgres:15.1-alpine3.17
+    container_name: accountDB
+    networks:
+      - microtest
+    environment:
+      POSTGRES_DB: ${ACCOUNT_DB}
+      POSTGRES_USER: ${ACCOUNT_USER}
+      POSTGRES_PASSWORD: ${ACCOUNT_PASSWORD}
+      POSTGRES_HOST: ${ACCOUNT_HOST}
+    volumes:
+      - accountDB_data1:/data/postgres
+      - accountDB_data2:/var/lib/postgresql/data
+
 
 networks:
   microtest:
     driver: bridge
 
 volumes:
-  authDB_data1:
-  authDB_data2:
-  micDbAdmin:
+  accountDB_data1:
+  accountDB_data2:
+  pgadminMicro:
