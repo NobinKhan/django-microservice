@@ -1,5 +1,5 @@
 from django_socio_grpc import proto_serializers
-import quickstart.grpc.quickstart_pb2 as quickstart_pb2
+import grpc.account_pb2 as accPB2
 from .models import Question
 
 

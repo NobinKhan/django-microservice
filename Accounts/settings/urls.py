@@ -15,7 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django_socio_grpc.utils.servicer_register import AppHandlerRegistry
+from account.services import QuestionService
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
+
+def grpc_handlers(server):
+    app_registry = AppHandlerRegistry("account", server)
+    app_registry.register(QuestionService)
