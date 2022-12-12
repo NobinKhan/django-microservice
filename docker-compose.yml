@@ -4,7 +4,7 @@ services:
   pgadminMicro:
     image: truecharts/pgadmin4:6.17.0
     container_name: pgadminMicro
-    restart: always
+    restart: never
     environment:
       PGDATA: ${PGDATA}
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
@@ -31,6 +31,7 @@ services:
       - accountDB
     ports:
       - "127.0.0.1:8000:8000"
+    restart: never
     environment:
       DJ_ENVIRONMENT: ${DJ_ENVIRONMENT}
       DJ_KEY_AUTH: ${DJ_KEY_AUTH}
@@ -49,6 +50,7 @@ services:
     container_name: accountDB
     networks:
       - microtest
+    restart: never
     environment:
       POSTGRES_DB: ${ACCOUNT_DB}
       POSTGRES_USER: ${ACCOUNT_USER}
