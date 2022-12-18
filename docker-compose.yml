@@ -4,7 +4,7 @@ services:
   pgadminMicro:
     image: truecharts/pgadmin4:6.17.0
     container_name: pgadminMicro
-    restart: never
+    restart: unless-stopped
     environment:
       PGDATA: ${PGDATA}
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
@@ -19,7 +19,9 @@ services:
       - pgadminMicro:/var/lib/pgadmin
 
 
-  account:
+  account_api:
+    container_name: account_api
+    image: microservices/account_api
     build:
       context: ./Accounts
     command: sh -c "/project/run.sh"
@@ -31,7 +33,7 @@ services:
       - accountDB
     ports:
       - "127.0.0.1:8000:8000"
-    restart: never
+    restart: unless-stopped
     environment:
       DJ_ENVIRONMENT: ${DJ_ENVIRONMENT}
       DJ_KEY_AUTH: ${DJ_KEY_AUTH}
@@ -50,7 +52,7 @@ services:
     container_name: accountDB
     networks:
       - microtest
-    restart: never
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${ACCOUNT_DB}
       POSTGRES_USER: ${ACCOUNT_USER}

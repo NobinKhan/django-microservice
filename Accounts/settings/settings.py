@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'account.apps.AccountConfig',
-    'django_socio_grpc',
 ]
 
 MIDDLEWARE = [
@@ -133,7 +132,3 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-GRPC_FRAMEWORK = {
-    'ROOT_HANDLERS_HOOK': 'settings.urls.grpc_handlers',
-}

@@ -1,5 +1,5 @@
-FROM python:3.11.0-slim-bullseye
-LABEL maintainer="nazrulkhan.dk@gmail.com"
+FROM python:3.11.1-slim-bullseye
+LABEL maintainer="NobinKhan <nazrulkhan.dk@gmail.com>"
 
 # env variables
 ENV PYTHONUNBUFFERED 1
