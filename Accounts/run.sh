@@ -9,7 +9,7 @@ if [ -f "$FILE" ]; then
 else
     echo "first time run"
     /root/.local/bin/poetry run python manage.py wait_for_db
-    /root/.local/bin/poetry run python manage.py migrate
+    # /root/.local/bin/poetry run python manage.py migrate
     /root/.local/bin/poetry run python manage.py runserver 0.0.0.0:8000
     # python manage.py makemigrations core team services blog portfolio
     # python manage.py collectstatic --noinput
