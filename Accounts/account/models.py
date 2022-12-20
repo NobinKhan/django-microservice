@@ -308,9 +308,9 @@ class Profile(models.Model):
     longitude = models.CharField(max_length=250, null=True, blank=True)
     latitude = models.CharField(max_length=250, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0, null=True, blank=True) # Default added for testing
-    status = models.CharField(max_length=10, default='Normal', choices=Status_Choices)
+    # status = models.CharField(max_length=10, default='Normal', choices=Status_Choices)
     discount = models.PositiveIntegerField(null=True,blank=True)
-    membership = models.CharField(max_length=50, default='Normal', choices=membershipChoices)
+    # membership = models.CharField(max_length=50, default='Normal', choices=membershipChoices)
     point = models.FloatField(default=0)
     used_point = models.FloatField(default=0, null=True, blank=True)
     current_point = models.FloatField(default=0, null=True, blank=True)
