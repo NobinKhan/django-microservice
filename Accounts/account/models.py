@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import load_backend, get_backends
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, Group
 
 
 def userDirectoryPath(instance, filename):
@@ -63,7 +63,7 @@ class UserManager(BaseUserManager):
             raise ValueError(
                 'Superuser must be assigned to is_superuser=True.')
 
-        return self._create_user(username, email, password, **extra_fields)
+        return self._create_user(username=username, email=email, password=password, **extra_fields)
 
     def with_perm(self, perm, is_active=True, include_superusers=True, backend=None, obj=None):
         if backend is None:
