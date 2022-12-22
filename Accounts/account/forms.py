@@ -79,15 +79,26 @@ class UserCreationForm(forms.ModelForm):
                 self.add_error("password2", error)
 
     def save(self, commit=True):
-        user = super().save(commit=False)
         password = self.cleaned_data["password1"]
-        print(f"2. in forms = {password}")
         if password:
+            user = super().save(commit=False)
             user.set_password(password)
-        else:
-            user.set_unusable_password()
-        if commit:
-            user.create
+            if commit:
+                user.save()
+            return user
+        phone = self.cleaned_data.pop('phone')
+        username = self.cleaned_data.pop('username')
+        email = self.cleaned_data.pop('email')
+        print(phone)
+        print(self.cleaned_data)
+        user = User.objects.create_user(
+            phone=phone,
+            username=username,
+            email=email,
+            **self.cleaned_data
+        )
+        print(f"2. in forms save= {user}")
+
         return user
 
 

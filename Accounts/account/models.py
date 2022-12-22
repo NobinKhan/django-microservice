@@ -35,8 +35,10 @@ class UserManager(BaseUserManager):
         GlobalUserModel = apps.get_model(
             self.model._meta.app_label, self.model._meta.object_name)
         username = GlobalUserModel.normalize_username(username)
+
+        print(f"extra in models = {extra_fields}")
+
         user = self.model(username=username, email=email, phone=phone, **extra_fields)
-        print(f"in model.create = {password}")
         if user.username == user.phone:
             user.set_unusable_password()
         else:
@@ -47,7 +49,7 @@ class UserManager(BaseUserManager):
     def create_user(self, phone=None, email=None, username=None, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(phone=None, email=None, username=None, password=None, **extra_fields)
+        return self._create_user(phone=phone, email=email, username=username, password=password, **extra_fields)
 
     def create_superuser(self, email=None, username=None, password=None, **extra_fields):
         if not username:
