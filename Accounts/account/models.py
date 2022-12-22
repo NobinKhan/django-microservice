@@ -36,10 +36,11 @@ class UserManager(BaseUserManager):
             self.model._meta.app_label, self.model._meta.object_name)
         username = GlobalUserModel.normalize_username(username)
         user = self.model(username=username, email=email, phone=phone, **extra_fields)
+        print(f"in model.create = {password}")
         if user.username == user.phone:
             user.set_unusable_password()
         else:
-            user.password = make_password(password)
+            user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -113,6 +114,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         blank=True
     )
+    password = models.CharField(_("password"), max_length=128, null=True, blank=True)
     email = models.EmailField(_('Email'), unique=True, null=True, blank=True)
     phone_regex = RegexValidator(regex=r"^\+(?:[0-9]●?){6,14}[0-9]$", message=_("Enter a valid international mobile phone number starting with +(country code)"))
     phone = models.CharField(validators=[phone_regex], verbose_name=_("Phone"), unique=True, max_length=17, blank=True, null=True)
