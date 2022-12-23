@@ -69,6 +69,15 @@ class UserCreationForm(forms.ModelForm):
 
     def _post_clean(self):
         super()._post_clean()
+
+        # Validate the username and phone fields.
+        username = self.cleaned_data.get("username")
+        phone = self.cleaned_data.get("phone")
+        if not username and not phone:
+            self.add_error(field=None, error=_('The given user must have phone number or username'))
+        if phone and not username:
+            self.instance.username = phone
+        
         # Validate the password after self.instance is updated with form data
         # by super().
         password = self.cleaned_data.get("password2")
@@ -80,25 +89,13 @@ class UserCreationForm(forms.ModelForm):
 
     def save(self, commit=True):
         password = self.cleaned_data["password1"]
+        user = super().save(commit=False)
         if password:
-            user = super().save(commit=False)
             user.set_password(password)
-            if commit:
-                user.save()
-            return user
-        phone = self.cleaned_data.pop('phone')
-        username = self.cleaned_data.pop('username')
-        email = self.cleaned_data.pop('email')
-        print(phone)
-        print(self.cleaned_data)
-        user = User.objects.create_user(
-            phone=phone,
-            username=username,
-            email=email,
-            **self.cleaned_data
-        )
-        print(f"2. in forms save= {user}")
-
+        else:
+            user.set_unusable_password()
+        if commit:
+            user.save()
         return user
 
 

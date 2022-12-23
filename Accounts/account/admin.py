@@ -11,7 +11,7 @@ from .forms import UserCreationForm, UserChangeForm
 class UserAdminConfig(UserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
-    # readonly_fields = ('username', )
+    readonly_fields = ('date_joined', )
     ordering = ('-date_joined', )
     list_display = (
         'id',
@@ -20,7 +20,7 @@ class UserAdminConfig(UserAdmin):
         'is_staff',
         'is_active',
     )
-    list_filter = ('phone', 'is_staff', 'is_superuser' )
+    list_filter = ('is_staff', 'is_superuser' )
     fieldsets = (
         ('Login Info', {
             'classes': ('collapse',),

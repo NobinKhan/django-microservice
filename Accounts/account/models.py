@@ -24,7 +24,7 @@ class UserManager(BaseUserManager):
         Create and save a user with the given username, email, and password.
         """
         if not username and not phone:
-            raise ValueError(_('The given user must have phone number'))
+            raise ValueError(_('The given user must have phone number or username'))
         if phone and not username:
             username = phone
         if email:
@@ -35,8 +35,12 @@ class UserManager(BaseUserManager):
         GlobalUserModel = apps.get_model(
             self.model._meta.app_label, self.model._meta.object_name)
         username = GlobalUserModel.normalize_username(username)
-
-        print(f"extra in models = {extra_fields}")
+        
+        if 'password1' in extra_fields:
+            extra_fields.pop('password1')
+            extra_fields.pop('password2')
+        groups = extra_fields.pop('groups')
+        user_permissions = extra_fields.pop('user_permissions')
 
         user = self.model(username=username, email=email, phone=phone, **extra_fields)
         if user.username == user.phone:
@@ -44,6 +48,9 @@ class UserManager(BaseUserManager):
         else:
             user.set_password(password)
         user.save(using=self._db)
+        # user.groups.set(groups)
+        # user.user_permissions.set(user_permissions)
+        # user.save()
         return user
 
     def create_user(self, phone=None, email=None, username=None, password=None, **extra_fields):
@@ -141,6 +148,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
+
+    def __str__(self):
+       return self.username or "No_Username"
 
 
 class Profile(models.Model):
