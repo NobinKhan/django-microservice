@@ -1,10 +1,9 @@
 from django.db import models
 from django.apps import apps
 from django.utils import timezone
-from django.core.mail import send_mail
+# from django.core.mail import send_mail
 from django_countries.fields import CountryField
 from django.core.validators import RegexValidator
-from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import load_backend, get_backends
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -135,9 +134,20 @@ class User(AbstractBaseUser, PermissionsMixin):
             'Designates whether this user should be treated as active. '
             'Unselect this instead of deleting accounts.'
         ),
+        null=True, blank=True
     )
-    is_staff = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    is_deleted = models.BooleanField(
+        _('Deleted Account'),
+        default=False,
+        help_text=_(
+            'If user wants to delete account than change this field to True. '
+            'If this seleted than all other objects related to this user will be marked as deleted too.'
+            'If User try to reopen account than just make this false but it will not reverse other related objects. '
+        ),
+        null=True, blank=True
+    )
+    is_staff = models.BooleanField(default=False, null=True, blank=True)
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now, null=True, blank=True)
 
     objects = UserManager()
 
@@ -155,12 +165,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Profile(models.Model):
     genderChoices = (
+        ('None', 'None'),
         ('Male', 'Male'),
         ('Female', 'Female'),
         ('Other', 'Other'),
     )
     Status_Choices = (
-        ('Normal', 'Normal'),
+        ('Legit', 'Legit'),
         ('Banned', 'Banned'),
     )
     membershipChoices = (
@@ -171,19 +182,35 @@ class Profile(models.Model):
         ("Platinum", "Platinum"),
     )
 
-    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, null=True, blank=True)
     name = models.CharField(_('name'), max_length=150, blank=True, null=True)
-    date_of_birth = models.DateField(verbose_name=_("Date of birth"))
-    gender = models.CharField(verbose_name=_("Gender"), max_length=20, choices=genderChoices, default='Male', null=True, blank=True)
-    photo = models.FileField(verbose_name=_("Photo"), upload_to='photos/', default='photos/default-user-avatar.png')
-    membership = models.CharField(max_length=50, default='Normal', choices=membershipChoices)
-    status = models.CharField(max_length=10, default='Normal', choices=Status_Choices)
+    date_of_birth = models.DateField(verbose_name=_("Date of birth"), null=True, blank=True)
+    gender = models.CharField(verbose_name=_("Gender"), max_length=20, choices=genderChoices, default='None', null=True, blank=True)
+    photo = models.FileField(verbose_name=_("Photo"), upload_to='photos/', default='photos/default-user-avatar.png', null=True, blank=True)
+    membership = models.CharField(verbose_name=_("Membership"), max_length=50, default='Normal', choices=membershipChoices, null=True, blank=True)
 
-    total_paid = models.FloatField(default=0, null=True, blank=True)
+    total_spend_amount = models.FloatField(verbose_name=_("Total Spend Amount"), default=0, null=True, blank=True)
+    point_used = models.FloatField(verbose_name=_("Point Used"), default=0, null=True, blank=True)
+    current_point = models.FloatField(verbose_name=_("Current Point"), default=0, null=True, blank=True)
 
-    point = models.FloatField(default=0)
-    point_used = models.FloatField(default=0, null=True, blank=True)
-    current_point = models.FloatField(default=0, null=True, blank=True)
+    status = models.CharField(verbose_name=_("User Status"), max_length=10, default='Legit', choices=Status_Choices, null=True, blank=True)
+    is_deleted = models.BooleanField(
+        _('Deleted Account'),
+        default=False,
+        help_text=_(
+            "If user deleted than this field will change to True, but reopen account won\'t change anything. "
+        ),
+        null=True, blank=True
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user",],
+                name="unique_profile"
+            )
+        ]
+    
 
     def __str__(self):
         if not self.user:
@@ -192,9 +219,9 @@ class Profile(models.Model):
 
 
 class Address(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(
-        verbose_name=_('address_name'),
+        verbose_name=_('Address Name'),
         max_length=150,
         unique=True,
         help_text=_('Give a name to this address like Home or Office'),
@@ -209,6 +236,14 @@ class Address(models.Model):
     country = CountryField(verbose_name=_("Country"), blank=True, null=True)
     longitude = models.CharField(max_length=250, null=True, blank=True)
     latitude = models.CharField(max_length=250, null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", 'name'],
+                name="unique_address"
+            )
+        ]
 
 
 """
