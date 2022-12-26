@@ -19,9 +19,7 @@ class Register(APIView):
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
-        new_user = serializer.save()
-            
-        
-        return Response({"message":f"{new_user.id}"}, status=status.HTTP_201_CREATED)
-            # if new_user:
-            #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = serializer.save()
+
+        return Response({"message":f"Account created successfully and OTP verification code sent to this {user.phone} number."
+                        }, status=status.HTTP_201_CREATED)

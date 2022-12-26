@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-from rest_framework.serializers import ModelSerializer, Serializer
+from rest_framework.serializers import ModelSerializer, Serializer, CharField
+from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
@@ -29,29 +30,34 @@ class ProfileSerializer(ModelSerializer):
         }
 
 
-class RegisterUserSerializer(ModelSerializer):
-    user = UserSerializer(read_only=True)
-    class Meta:
-        model = Profile
-        fields = ('user', 'name',)
-        extra_kwargs = {
-            'user': {'required': True},
-            # 'name': {'required': True}
-        }
-    
-    def is_valid(self, *, raise_exception=False):
-        self.initial_data = {
-            'user': {'phone':self.initial_data.get('phone')},
-            'name': self.initial_data.get('name'),
-        }
-        return super().is_valid(raise_exception=raise_exception)
-    
-    
-    # def validate(self, attrs):
-    #     print(f"in validation = {attrs}")
-    #     return attrs
+class RegisterUserSerializer(Serializer):
+    phone = CharField(max_length=17)
+    name = CharField(max_length=250)
 
-    # def save(self, **kwargs):
-    #     print(f"in save = {self.validated_data}")
-    #     return super().save(**kwargs)
+    class Meta:
+        fields = ('phone', 'name',)
+        extra_kwargs = {
+            'phone': {'required': True},
+            'name': {'required': True}
+        }
+    
+    def save(self, **kwargs):
+        user = UserSerializer(data={'phone': self.initial_data.get('phone')})
+        if not user.is_valid():
+            self._errors = user._errors
+            if self._errors:
+                raise ValidationError(self.errors)
+            return not bool(self._errors)
+        user.save()
+
+        profile = ProfileSerializer(data={'user':user.instance.id, 'name':self.initial_data.get('name')})
+        if not profile.is_valid():
+            user.instance.delete()
+            self._errors = profile._errors
+            if self._errors:
+                raise ValidationError(self.errors)
+            return not bool(self._errors)
+        profile.save()
+        return user.instance
+    
 

@@ -1,3 +1,5 @@
+from random import randint
+
 from django.db import models
 from django.apps import apps
 from django.core.validators import RegexValidator
@@ -9,7 +11,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 # from django.core.mail import send_mail
 
 from django_countries.fields import CountryField
-from random import randint
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 def userDirectoryPath(instance, filename):
@@ -28,6 +30,7 @@ class UserManager(BaseUserManager):
             raise ValueError(_('The given user must have phone number or username'))
         if phone and not username:
             username = phone
+            extra_fields['is_active'] = False
         if email:
             email = self.normalize_email(email)
         # Lookup the real model class from the global app registry so this
@@ -126,8 +129,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     password = models.CharField(_("password"), max_length=128, null=True, blank=True)
     email = models.EmailField(_('Email'), unique=True, null=True, blank=True)
-    phone_regex = RegexValidator(regex=r"^\+(?:[0-9]●?){6,14}[0-9]$", message=_("Enter a valid international mobile phone number starting with +(country code)"))
-    phone = models.CharField(validators=[phone_regex], verbose_name=_("Phone"), unique=True, max_length=17, blank=True, null=True)
+    phone = PhoneNumberField(verbose_name=_("Phone"), unique=True, region='BD', blank=True, null=True)
     device_id = models.CharField(max_length=1000, null=True, blank=True)
     is_active = models.BooleanField(
         _('active'),
@@ -164,6 +166,19 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
        return self.username or "No_Username"
+
+    def save(self, *args, **kwargs):
+        if self._state.adding == True: # when creating
+            if self.phone and self.phone != self.username:
+                self.username = self.phone
+            if self.phone == self.username:
+                self.is_active = False
+
+        if self._state.adding == False: # when updating
+            if self.phone and self.phone != self.username:
+                self.username = self.phone
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
 
 class Profile(models.Model):
