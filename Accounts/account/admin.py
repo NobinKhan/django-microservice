@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models import User, Profile, Address
+from .models import User, Profile, Address, OTPtoken
 from .forms import UserCreationForm, UserChangeForm
 
 
@@ -67,4 +67,11 @@ class AddressAdmin(admin.ModelAdmin):
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('id','user','name', 'status', 'current_point')
+
+
+@admin.register(OTPtoken)
+class OTPtokenAdmin(admin.ModelAdmin):
+    list_display = ('id', 'type', 'token', 'created')
+    list_editable = ()
+    # readonly_fields = ('id', 'type', 'user', 'token', 'created', 'updated')
 

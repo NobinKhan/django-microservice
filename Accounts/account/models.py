@@ -1,13 +1,15 @@
 from django.db import models
 from django.apps import apps
-from django.utils import timezone
-# from django.core.mail import send_mail
-from django_countries.fields import CountryField
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import load_backend, get_backends
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, Group
+# from django.core.mail import send_mail
+
+from django_countries.fields import CountryField
+from random import randint
 
 
 def userDirectoryPath(instance, filename):
@@ -147,7 +149,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True, blank=True
     )
     is_staff = models.BooleanField(default=False, null=True, blank=True)
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now, null=True, blank=True)
+    date_joined = models.DateTimeField(_('date joined'), auto_now=True, null=True, blank=True)
+    updated = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     objects = UserManager()
 
@@ -202,6 +205,8 @@ class Profile(models.Model):
         ),
         null=True, blank=True
     )
+    created = models.DateTimeField(auto_now=True,null=True)
+    updated = models.DateTimeField(auto_now_add=True,null=True)
 
     class Meta:
         constraints = [
@@ -244,6 +249,62 @@ class Address(models.Model):
                 name="unique_address"
             )
         ]
+
+
+class OTPtoken(models.Model):
+    token_type = (
+        ("Login", "Login"),
+        ("Register", "Register"),
+        ("PasswordReset", "PasswordReset"),
+        ("Others", "Others"),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    type = models.CharField(
+        verbose_name=_('Type'),
+        max_length=150,
+        default='Login',
+        choices=token_type,
+        help_text=_('For which perpose this token is going to be use.'),
+        null=True,
+        blank=True
+    )
+    token = models.PositiveIntegerField(unique=True, null=True, blank=True)
+    is_active = models.BooleanField(
+        _('active'),
+        default=True,
+        help_text=_(
+            'Designates whether this token should be treated as active. '
+            'Unselect this to make it invalidate.'
+        ),
+        null=True, blank=True
+    )
+    created = models.DateTimeField(auto_now=True,null=True)
+    updated = models.DateTimeField(auto_now_add=True,null=True)
+
+    class Meta:
+        verbose_name = _('OTPToken')
+        verbose_name_plural = _('OTPtokens')
+
+    def __str__(self):
+        if not self.token or not self.type:
+            return 'Invalid Token'
+        return f"{self.type}-{self.token}"
+    
+    def clean(self):
+        if self._state.adding == True:
+            if not self.type:
+                msg = "You must provide token type"
+                raise ValidationError(msg)
+        if self.id == True:
+            msg = "OTP Token Object is Read-Only, You can't change."
+            raise ValidationError(msg)
+    
+    def save(self, *args, **kwargs):
+        self.token = randint(100000, 999999)
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
 
 
 """

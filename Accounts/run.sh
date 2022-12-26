@@ -5,6 +5,7 @@ if [ -f "$FILE" ]; then
     echo "Skipping initialization..."
     echo "If you want to run initialization again remove the file"
     
+    # /root/.local/bin/poetry install
     /root/.local/bin/poetry run python manage.py wait_for_db
     /root/.local/bin/poetry run python manage.py migrate
     /root/.local/bin/poetry run python manage.py runserver 0.0.0.0:8000
