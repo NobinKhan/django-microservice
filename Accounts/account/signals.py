@@ -13,7 +13,7 @@ def user_post_Signal(sender, **kwargs):
     instance = kwargs['instance']
 
     if kwargs.get('created'):
-        if not instance.is_active:
+        if not instance.is_active and instance.phone:
             previous_otp = OTPtoken.objects.filter(type='Register', user=instance)
             if previous_otp:
                 previous_otp.delete()
@@ -24,8 +24,11 @@ def user_post_Signal(sender, **kwargs):
 @receiver(post_save, sender=OTPtoken)
 def otp_post_Signal(sender, **kwargs):
     instance = kwargs['instance']
-    if kwargs.get('created'):
+    if kwargs.get('created'): # deleting previous objects
         previous_otps = OTPtoken.objects.filter(created__lt=timezone.now() - timedelta(days=2)).exclude(type='Others')
+        if previous_otps:
+            previous_otps.delete()
+        previous_otps = OTPtoken.objects.filter(is_active=False, created__lt=timezone.now() - timedelta(days=2))
         if previous_otps:
             previous_otps.delete()
 
