@@ -73,5 +73,6 @@ class ProfileAdmin(admin.ModelAdmin):
 class OTPtokenAdmin(admin.ModelAdmin):
     list_display = ('id', 'type', 'token', 'created')
     list_editable = ()
-    # readonly_fields = ('id', 'type', 'user', 'token', 'created', 'updated')
+    readonly_fields = ('user', 'token', 'created', 'updated')
+
 

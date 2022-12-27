@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
@@ -17,6 +19,16 @@ def user_post_Signal(sender, **kwargs):
                 previous_otp.delete()
             otp = OTPtoken(type='Register', user=instance)
             otp.save()
+
+
+@receiver(post_save, sender=OTPtoken)
+def otp_post_Signal(sender, **kwargs):
+    instance = kwargs['instance']
+    if kwargs.get('created'):
+        previous_otps = OTPtoken.objects.filter(created__lt=timezone.now() - timedelta(days=2)).exclude(type='Others')
+        if previous_otps:
+            previous_otps.delete()
+
 
 
 

@@ -1,5 +1,6 @@
 from random import randint
-
+from datetime import datetime
+from django.utils import timezone
 from django.db import models
 from django.apps import apps
 from django.core.validators import RegexValidator
@@ -310,12 +311,18 @@ class OTPtoken(models.Model):
             if not self.type:
                 msg = "You must provide token type"
                 raise ValidationError(msg)
-        if self.id == True:
-            msg = "OTP Token Object is Read-Only, You can't change."
-            raise ValidationError(msg)
+            if not self.user and self.type != 'Others':
+                msg = "OTP type can be only Others."
+                raise ValidationError(msg)
+        if self.id:
+            old = OTPtoken.objects.get(pk=self.pk)
+            if old.type != 'Others' and old.user:
+                msg = "OTP Token Object is Read-Only, You can't change."
+                raise ValidationError(msg)
     
     def save(self, *args, **kwargs):
-        self.token = randint(100000, 999999)
+        if self._state.adding == True:
+            self.token = randint(100000, 999999)
         self.full_clean()
         return super().save(*args, **kwargs)
 
