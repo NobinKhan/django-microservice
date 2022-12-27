@@ -31,6 +31,11 @@ def otp_post_Signal(sender, **kwargs):
         previous_otps = OTPtoken.objects.filter(is_active=False, created__lt=timezone.now() - timedelta(days=2))
         if previous_otps:
             previous_otps.delete()
+        if instance.user:
+            previous_otps = OTPtoken.objects.filter(user=instance.user).exclude(token=instance.token)
+            if previous_otps:
+                previous_otps.delete()
+
 
 
 

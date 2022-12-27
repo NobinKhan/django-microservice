@@ -24,7 +24,7 @@ class UserAdminConfig(UserAdmin):
     fieldsets = (
         ('Login Info', {
             'classes': ('collapse',),
-            'fields': ('username','phone', 'password', 'is_active', 'is_staff')
+            'fields': ('username','phone', 'password', 'is_active', 'is_staff', 'is_deleted')
         }),
         ('Personal Info', {
             'classes': ('collapse',),

@@ -27,6 +27,7 @@ class UserManager(BaseUserManager):
         """
         Create and save a user with the given username, email, and password.
         """
+        print(f"In User model create = {self.phone}")
         if not username and not phone:
             raise ValueError(_('The given user must have phone number or username'))
         if phone and not username:
@@ -178,6 +179,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self._state.adding == False: # when updating
             if self.phone and self.phone != self.username:
                 self.username = self.phone
+            if self.is_deleted:
+                self.is_active = False
         self.full_clean()
         return super().save(*args, **kwargs)
 

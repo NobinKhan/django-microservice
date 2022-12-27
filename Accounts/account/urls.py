@@ -6,12 +6,13 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-from .views import Register, AccessToken
+from .views import Register, AccessToken, SendOTP
 
 
 urlpatterns = [
     path('create/', Register.as_view(), name='register'),
     path('get_token/', AccessToken.as_view(), name='get_token'),
+    path('send_otp/', SendOTP.as_view(), name='send_otp'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),

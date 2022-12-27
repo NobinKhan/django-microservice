@@ -7,6 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
 from .models import Profile
+from functions.handle_error import get_object_or_None
 
 User = get_user_model()
 
@@ -18,6 +19,7 @@ class UserSerializer(ModelSerializer):
         extra_kwargs = {
             'phone': {'required': True},
         }
+
 
 
 class ProfileSerializer(ModelSerializer):
