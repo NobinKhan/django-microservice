@@ -1,14 +1,11 @@
 from random import randint
-from datetime import datetime
-from django.utils import timezone
 from django.db import models
 from django.apps import apps
-from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import load_backend, get_backends
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, Group
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 # from django.core.mail import send_mail
 
 from django_countries.fields import CountryField

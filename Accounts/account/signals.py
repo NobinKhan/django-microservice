@@ -37,9 +37,6 @@ def otp_post_Signal(sender, **kwargs):
                 previous_otps.delete()
 
 
-
-
-
 @receiver(pre_save, sender=User)
 def updateAmbulanceOrder_signal(sender, **kwargs):
     instance = kwargs['instance']
