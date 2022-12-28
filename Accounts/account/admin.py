@@ -12,7 +12,7 @@ class UserAdminConfig(UserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
     readonly_fields = ('date_joined', )
-    ordering = ('-date_joined', )
+    ordering = ('-id', )
     list_display = (
         'id',
         'username',

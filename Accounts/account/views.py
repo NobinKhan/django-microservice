@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 #### all   Rest framework  import ...
 from rest_framework import status
@@ -19,39 +20,41 @@ def verify_phone(phone):
     try:
         verified_phone = PhoneNumber.from_string(phone)
         if not verified_phone.is_valid():
-            return Response({"error":"Invalid Phone Number"}, status=status.HTTP_406_NOT_ACCEPTABLE)
-        return verified_phone
+            return True, "Invalid Phone Number", status.HTTP_406_NOT_ACCEPTABLE
+        return False, verified_phone, None
     except Exception as msg :
-        return Response({"error":msg.args[0]}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        return True, msg.args[0], status.HTTP_406_NOT_ACCEPTABLE
 
 
 def verify_user(phone):
     user = get_object_or_None(User, phone=phone, username=phone)
     if not user:
-        return Response({"error":"User Not Found With The Given Phone Number"}, status=status.HTTP_404_NOT_FOUND)
-    return user
+        return True, "User Not Found With The Given Phone Number", status.HTTP_404_NOT_FOUND
+    return False, user, None
 
 
 def verify_token(token, user):
     try:
         token = int(token)
     except Exception as msg :
-        return Response({"error":msg.args[0]}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        return True, msg.args[0], status.HTTP_406_NOT_ACCEPTABLE
     otp_obj = get_object_or_None(OTPtoken, token=token, is_active=True)
     if not otp_obj:
-        return Response({"error":"Invalid OTP Code."}, status=status.HTTP_404_NOT_FOUND)
+        return True, "Invalid OTP Code.", status.HTTP_404_NOT_FOUND
     if otp_obj.type == 'Others':
         otp_obj.is_active = False
         otp_obj.save()
+        return False, None, None
     elif otp_obj.type == 'Register' and otp_obj.user.phone == user.phone:
         user.is_active = True
         user.save()
         otp_obj.delete()
+        return False, None, None
     elif otp_obj.type == 'Login' and otp_obj.user.phone == user.phone:
         otp_obj.delete()
+        return False, None, None
     else:
-        return Response({"error":"Invalid OTP Code."}, status=status.HTTP_404_NOT_FOUND)
-    return True
+        return True, "Invalid OTP Code.", status.HTTP_404_NOT_FOUND
 
 
 def saving_otp_token(type, user=None):
@@ -89,17 +92,21 @@ class Login(APIView):
         if not token or not phone:
             return Response({"error":" 'token' and 'phone' field is required. They can't be empty or null."}, status=status.HTTP_404_NOT_FOUND)
         
-        phone = verify_phone(phone=phone)
-        user = verify_user(phone=phone)
-        token = verify_token(token=token, user=user)
-        print(token)
-        if token:
-            return Response({
+        error, phone, error_code = verify_phone(phone=phone)
+        if error:
+            return Response({"error":phone}, status=error_code)
+        
+        error, user, error_code = verify_user(phone=phone)
+        if error:
+            return Response({"error":user}, status=error_code)
+        
+        error, msg, error_code = verify_token(token=token, user=user)
+        if error:
+            return Response({"error":msg}, status=error_code)
+        return Response({
                 "refress": "just kidding.",
                 "access": "It's a mysterie.",
             }, status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response({"error":"Invalid OTP Code."}, status=status.HTTP_404_NOT_FOUND)
 
 
 class SendOTP(APIView):
@@ -109,10 +116,22 @@ class SendOTP(APIView):
         if not phone:
             return Response({"error":"'phone' param is required. It can't be empty or null."}, status=status.HTTP_404_NOT_FOUND)
         
-        phone = verify_phone(phone=phone.replace(" ", "+"))
-        user = verify_user(phone=phone)
-        if not user.is_deleted:
+        error, phone, error_code = verify_phone(phone=phone.replace(" ", "+"))
+        if error:
+            return Response({"error":phone}, status=error_code)
+        
+        error, user, error_code = verify_user(phone=phone)
+        if error:
+            return Response({"error":user}, status=error_code)
+        if user.is_deleted:
             return Response({"error":"User Not Found With The Given Phone Number"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Time limite to send OTP again
+        old_otp = OTPtoken.objects.filter(user=user)
+        if old_otp:
+            difference = timezone.now() - old_otp[0].created
+            if difference.total_seconds() < 60:
+                return Response({"message": f"Please wait {int(60-difference.total_seconds()+2)} seconds to get another OTP"}, status=status.HTTP_204_NO_CONTENT)
 
         # Sending OTP Code
         if user.is_active:
