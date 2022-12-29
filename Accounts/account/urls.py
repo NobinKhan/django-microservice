@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-from .views import Register, Login, SendOTP
+from .views import Register, Login, SendOTP, ServiceQuery
 
 
 urlpatterns = [
@@ -14,4 +14,6 @@ urlpatterns = [
     path('register/', Register.as_view(), name='register'),
     path('jwt_verify/', TokenVerifyView.as_view(), name='jwt_verify'),
     path('jwt_refresh/', TokenRefreshView.as_view(), name='jwt_refresh'),
+    path('cheking/', ServiceQuery.as_view(), name='cheking')
 ]
+

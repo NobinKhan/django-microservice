@@ -38,7 +38,6 @@ def saving_otp_token(type, user=None):
 
 
 class Register(APIView):
-    # permission_classes = [IsAuthenticated]
     def post(self, request):
         serializer = RegisterUserSerializer(data=request.data)
 
@@ -95,4 +94,9 @@ class Login(TokenObtainPairView):
     serializer_class = LoginSerializer
 
 
+class ServiceQuery(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        print(f"Service Cheking request = {request}")
+        return Response({"message":f" {45} number."}, status=status.HTTP_201_CREATED)
 
