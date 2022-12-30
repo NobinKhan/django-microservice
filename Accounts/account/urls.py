@@ -3,6 +3,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
+    TokenBlacklistView,
 )
 
 from .views import Register, Login, SendOTP, ServiceQuery
@@ -14,6 +15,7 @@ urlpatterns = [
     path('register/', Register.as_view(), name='register'),
     path('jwt_verify/', TokenVerifyView.as_view(), name='jwt_verify'),
     path('jwt_refresh/', TokenRefreshView.as_view(), name='jwt_refresh'),
-    path('cheking/', ServiceQuery.as_view(), name='cheking')
+    path('checking/', ServiceQuery.as_view(), name='cheking'),
+    path('logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
 ]
 

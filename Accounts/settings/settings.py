@@ -11,7 +11,7 @@ SECRET_KEY = environ.get('DJ_KEY_AUTH')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(environ.get('DEBUG', default=False))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
