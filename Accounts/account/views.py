@@ -97,6 +97,19 @@ class Login(TokenObtainPairView):
 class ServiceQuery(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
-        print(f"Service Cheking request = {request}")
+        print(f"Service Cheking request = {request.user.username}")
+        
+        # get ip
+        user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
+        if user_ip_address:
+            ip = user_ip_address.split(',')[0]
+        print(f"HTTP_X_FORWARDED_FOR = {user_ip_address}")
+
+        ip = request.META.get('REMOTE_ADDR')
+        print(f"REMOTE_ADDR = {ip}")
+
+        print(f"headers = {request.headers}")
+        print(f"Meta = {request.META}")
+
         return Response({"message":f" {45} number."}, status=status.HTTP_201_CREATED)
 
