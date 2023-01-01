@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 #### all   Rest framework  import ...
 from rest_framework import status
@@ -8,10 +10,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from .serializers import RegisterUserSerializer, LoginSerializer
 from .models import OTPtoken, Profile
 from functions.handle_error import get_object_or_None
+from rest_framework import HTTP_HEADER_ENCODING
 
 
 User = get_user_model()
@@ -94,22 +99,76 @@ class Login(TokenObtainPairView):
     serializer_class = LoginSerializer
 
 
+AUTH_HEADER_TYPE_BYTES = {h.encode(HTTP_HEADER_ENCODING) for h in settings.SIMPLE_JWT.get('AUTH_HEADER_TYPES')}
+
+
+def get_header(request):
+    """
+    Extracts the header containing the JSON web token from the given
+    request.
+    """
+    header = request.META.get(settings.SIMPLE_JWT.get('AUTH_HEADER_NAME'))
+
+    if isinstance(header, str):
+        # Work around django test client oddness
+        header = header.encode(HTTP_HEADER_ENCODING)
+
+    return header
+
+def get_raw_token(header):
+    """
+    Extracts an unvalidated JSON web token from the given "Authorization"
+    header value.
+    """
+    parts = header.split()
+
+    if len(parts) == 0:
+        # Empty AUTHORIZATION header sent
+        return None
+
+    if parts[0] not in AUTH_HEADER_TYPE_BYTES:
+        # Assume the header does not contain a JSON web token
+        return None
+
+    if len(parts) != 2:
+        raise AuthenticationFailed(
+            _("Authorization header must contain two space-delimited values"),
+            code="bad_authorization_header",
+        )
+
+    return parts[1]
+
+
+
+
 class ServiceQuery(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
-        print(f"Service Cheking request = {request.user.username}")
+        header = get_header(request)
+        if header is None:
+            return None
+
+        raw_token = get_raw_token(header)
+        if raw_token is None:
+            return None
         
-        # get ip
-        user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
-        if user_ip_address:
-            ip = user_ip_address.split(',')[0]
-        print(f"HTTP_X_FORWARDED_FOR = {user_ip_address}")
+        # access = AccessToken(raw_token)
+        access = AccessToken(request.data.get('refresh'))
+        refresh = RefreshToken(request.data.get('refresh'))
+        print(f"In View ServiceQuery Authorization payload= {access.payload}")
+        print(f"In View ServiceQuery refresh payload= {refresh.payload}")
+        
+        # # get ip
+        # user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
+        # if user_ip_address:
+        #     ip = user_ip_address.split(',')[0]
+        # print(f"HTTP_X_FORWARDED_FOR = {user_ip_address}")
 
-        ip = request.META.get('REMOTE_ADDR')
-        print(f"REMOTE_ADDR = {ip}")
+        # ip = request.META.get('REMOTE_ADDR')
+        # print(f"REMOTE_ADDR = {ip}")
 
-        print(f"headers = {request.headers}")
-        print(f"Meta = {request.META}")
+        # print(f"headers = {request.headers}")
+        # print(f"Meta = {request.META}")
 
-        return Response({"message":f" {45} number."}, status=status.HTTP_201_CREATED)
+        return Response({"message":f" check log."}, status=status.HTTP_201_CREATED)
 
