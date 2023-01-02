@@ -13,6 +13,7 @@ psycopg2 = "^2.9.5"
 django-countries = "^7.5"
 djangorestframework-simplejwt = "^5.2.2"
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^7.0.1"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 
 
 [build-system]

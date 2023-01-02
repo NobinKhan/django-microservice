@@ -16,7 +16,11 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from .serializers import RegisterUserSerializer, LoginSerializer
 from .models import OTPtoken, Profile
 from functions.handle_error import get_object_or_None
-from rest_framework import HTTP_HEADER_ENCODING
+
+# testing imports
+from jose import jwe
+from ast import literal_eval
+
 
 
 User = get_user_model()
@@ -99,65 +103,34 @@ class Login(TokenObtainPairView):
     serializer_class = LoginSerializer
 
 
-AUTH_HEADER_TYPE_BYTES = {h.encode(HTTP_HEADER_ENCODING) for h in settings.SIMPLE_JWT.get('AUTH_HEADER_TYPES')}
-
-
-def get_header(request):
-    """
-    Extracts the header containing the JSON web token from the given
-    request.
-    """
-    header = request.META.get(settings.SIMPLE_JWT.get('AUTH_HEADER_NAME'))
-
-    if isinstance(header, str):
-        # Work around django test client oddness
-        header = header.encode(HTTP_HEADER_ENCODING)
-
-    return header
-
-def get_raw_token(header):
-    """
-    Extracts an unvalidated JSON web token from the given "Authorization"
-    header value.
-    """
-    parts = header.split()
-
-    if len(parts) == 0:
-        # Empty AUTHORIZATION header sent
-        return None
-
-    if parts[0] not in AUTH_HEADER_TYPE_BYTES:
-        # Assume the header does not contain a JSON web token
-        return None
-
-    if len(parts) != 2:
-        raise AuthenticationFailed(
-            _("Authorization header must contain two space-delimited values"),
-            code="bad_authorization_header",
-        )
-
-    return parts[1]
-
-
 
 
 class ServiceQuery(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
-        header = get_header(request)
-        if header is None:
-            return None
+        start = timezone.now()
+        for i in range(1):
+            payload = {
+                'user_id': '12',
+                'username': 'nobinkhan',
+                'jti': 'sd1322351v32dsds235f1dfv15',
+            }
+            secret = "hVmYp3s6v9y$B&E)H@McQfTjWnZr4t7w"
+            # signedJWS = jws.sign(payload=payload, key=secret, algorithm='HS256')
+            jwetoken = jwe.encrypt(str(payload), secret, algorithm='dir', encryption='A256GCM')
 
-        raw_token = get_raw_token(header)
-        if raw_token is None:
-            return None
+
+            
+
+            jwedata = literal_eval(jwe.decrypt(jwe_str=jwetoken, key=secret).decode()) 
+        end = timezone.now()
+        lTime = (end-start).microseconds/1000
+        print(f"took {lTime} msecond")
         
-        # access = AccessToken(raw_token)
-        access = AccessToken(request.data.get('refresh'))
-        refresh = RefreshToken(request.data.get('refresh'))
-        print(f"In View ServiceQuery Authorization payload= {access.payload}")
-        print(f"In View ServiceQuery refresh payload= {refresh.payload}")
+        # access = AccessToken()
+        # refresh = RefreshToken(request.data.get('refresh'))
         
+
         # # get ip
         # user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
         # if user_ip_address:
@@ -170,5 +143,5 @@ class ServiceQuery(APIView):
         # print(f"headers = {request.headers}")
         # print(f"Meta = {request.META}")
 
-        return Response({"message":f" check log."}, status=status.HTTP_201_CREATED)
+        return Response("Done", status=status.HTTP_201_CREATED)
 
