@@ -35,14 +35,21 @@ services:
       - "0.0.0.0:8000:8000"
     restart: unless-stopped
     environment:
+    # django
       DJ_ENVIRONMENT: ${DJ_ENVIRONMENT}
       DJ_KEY_AUTH: ${DJ_KEY_AUTH}
       DEBUG: ${DEBUG}
+    # database
       DEFAULT_DB_NAME: ${ACCOUNT_DB}
       DEFAULT_DB_USER: ${ACCOUNT_USER}
       DEFAULT_DB_PASSWORD: ${ACCOUNT_PASSWORD}
       DEFAULT_DB_HOST: ${ACCOUNT_HOST}
       DEFAULT_DB_PORT: ${ACCOUNT_PORT}
+    # redis
+      REDIS_BACKEND: ${REDIS_BACKEND}
+      REDIS_LOCATION: ${REDIS_LOCATION}
+      SESSION_ENGINE: ${SESSION_ENGINE}
+      SESSION_CACHE_ALIAS: ${SESSION_CACHE_ALIAS}
     networks:
       - microtest
 
@@ -63,6 +70,19 @@ services:
       - accountDB_data2:/var/lib/postgresql/data
 
 
+  micro_redis:
+    image: redis:7.0.5-alpine
+    container_name: micro_redis
+    restart: always
+    depends_on:
+      - accountDB
+    volumes: 
+      - redis:/data
+    ports:
+      - '6379:6379'
+    networks:
+      - microtest
+
 networks:
   microtest:
     driver: bridge
@@ -71,3 +91,4 @@ volumes:
   accountDB_data1:
   accountDB_data2:
   pgadminMicro:
+  redis:
