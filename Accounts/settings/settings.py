@@ -81,6 +81,18 @@ DATABASES = {
     },
 }
 
+# redis cache
+CACHE_TTL = 60 * 1500
+
+CACHES = {
+    "default": {
+        "BACKEND": environ.get('REDIS_BACKEND'),
+        "LOCATION": environ.get('REDIS_LOCATION'),
+    }
+}
+SESSION_ENGINE = environ.get('SESSION_ENGINE')
+SESSION_CACHE_ALIAS = environ.get('SESSION_CACHE_ALIAS')
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
