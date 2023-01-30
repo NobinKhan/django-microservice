@@ -1,6 +1,6 @@
-from django.contrib.auth import get_user_model
-from django.utils import timezone
 from django.conf import settings
+from django.utils import timezone
+from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 #### all   Rest framework  import ...
@@ -10,16 +10,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from .serializers import RegisterUserSerializer, LoginSerializer
 from .models import OTPtoken, Profile
 from functions.handle_error import get_object_or_None
 
 # testing imports
-from jose import jwe
-from ast import literal_eval
+
 
 
 
@@ -119,12 +116,7 @@ class ServiceQuery(APIView):
             }
             secret = "hVmYp3s6v9y$B&E)H@McQfTjWnZr4t7w"
             # signedJWS = jws.sign(payload=payload, key=secret, algorithm='HS256')
-            jwetoken = jwe.encrypt(str(payload), secret, algorithm='dir', encryption='A256GCM')
 
-
-            
-
-            jwedata = literal_eval(jwe.decrypt(jwe_str=jwetoken, key=secret).decode()) 
         end = timezone.now()
         lTime = (end-start).microseconds/1000
         print(f"took {lTime} msecond")
