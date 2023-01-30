@@ -35,11 +35,13 @@ def verify_phone(phone):
     except Exception as msg :
         return True, msg.args[0], status.HTTP_406_NOT_ACCEPTABLE
 
+
 def verify_user(phone):
     user = get_object_or_None(User, phone=phone, username=phone)
     if not user:
         return True, "User Not Found With The Given Phone Number", status.HTTP_404_NOT_FOUND
     return False, user, None
+
 
 def saving_otp_token(type, user=None):
     otp = OTPtoken(type=type, user=user)
@@ -64,7 +66,7 @@ class Register(APIView):
         else:
             serializer.save()
 
-        return Response({"message":f"Account created successfully and OTP verification code sent to this {serializer.validated_data.get('phone')} number."}, status=status.HTTP_201_CREATED)
+        return Response({"message":f"OTP verification code sent to this {serializer.validated_data.get('phone')} number."}, status=status.HTTP_201_CREATED)
 
 
 class SendOTP(APIView):

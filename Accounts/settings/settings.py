@@ -1,6 +1,9 @@
 from os import environ
 from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,6 +36,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,15 +73,15 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
 
-        'NAME': environ.get('DEFAULT_DB_NAME'),
+        'NAME': environ.get('ACCOUNT_DB'),
 
-        'USER': environ.get('DEFAULT_DB_USER'),
+        'USER': environ.get('ACCOUNT_USER'),
 
-        'PASSWORD': environ.get('DEFAULT_DB_PASSWORD'),
+        'PASSWORD': environ.get('ACCOUNT_PASSWORD'),
 
-        'HOST': environ.get('DEFAULT_DB_HOST'),
+        'HOST': environ.get('ACCOUNT_HOST'),
 
-        'PORT': environ.get('DEFAULT_DB_PORT'),
+        'PORT': environ.get('ACCOUNT_PORT'),
     },
 }
 
@@ -90,8 +94,8 @@ CACHES = {
         "LOCATION": environ.get('REDIS_LOCATION'),
     }
 }
-SESSION_ENGINE = environ.get('SESSION_ENGINE')
-SESSION_CACHE_ALIAS = environ.get('SESSION_CACHE_ALIAS')
+# SESSION_ENGINE = environ.get('SESSION_ENGINE')
+# SESSION_CACHE_ALIAS = environ.get('SESSION_CACHE_ALIAS')
 
 
 # Password validation
@@ -125,27 +129,25 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
-STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Custom Settings
+# Custom Auth Settings
 AUTH_USER_MODEL = 'account.User'
 
-
+# media files config
 MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'static/media'
 
-MEDIA_ROOT = BASE_DIR / 'media'
+# static files config
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static/webfiles'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Other Settings
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',

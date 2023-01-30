@@ -1,7 +1,8 @@
+import requests
 from datetime import timedelta
 from django.utils import timezone
-from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.db.models.signals import post_save, pre_save
 
 from .models import User, OTPtoken
 
@@ -36,6 +37,22 @@ def otp_post_Signal(sender, **kwargs):
             if previous_otps:
                 previous_otps.delete()
 
+        # sending token to user
+        if not instance.type == 'Others' and instance.user and instance.token:
+            api_key = '60Lj245sqWH0E1BZzN9H1Vod74z35KKw71Vj2ssa'
+            url = "https://api.sms.net.bd/sendsms"
+            msg = f"Your Care-Box OTP Code is {instance.token}"
+            to = str(instance.user.phone).replace('+', '')
+            payload = {
+                'api_key': api_key,
+                'msg': msg,
+                'to': to
+            }
+
+            response = requests.request("POST", url, data=payload)
+            if response.status_code == 200:
+                print(response.json())
+                # return response.json().get("bkashURL"), response.json().get("paymentID")
 
 @receiver(pre_save, sender=User)
 def updateAmbulanceOrder_signal(sender, **kwargs):
@@ -43,3 +60,4 @@ def updateAmbulanceOrder_signal(sender, **kwargs):
 
     if instance.id:
        pass
+
