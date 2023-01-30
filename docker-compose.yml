@@ -2,15 +2,16 @@ version: "3.9"
 
 services:
   pgadminMicro:
-    image: truecharts/pgadmin4:6.17.0
+    image: dpage/pgadmin4:6.19
     container_name: pgadminMicro
     restart: unless-stopped
+
     environment:
       PGDATA: ${PGDATA}
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
-      - "127.0.0.1:5050:80"
+      - "5050:80"
     networks:
       - microtest
     depends_on:
@@ -19,39 +20,39 @@ services:
       - pgadminMicro:/var/lib/pgadmin
 
 
-  account_api:
-    container_name: account_api
-    image: microservices/account_api
-    build:
-      context: ./Accounts
-    command: sh -c "/project/run.sh"
-    volumes:
-      - type: bind
-        source: ./Accounts
-        target: /project
-    depends_on:
-      - accountDB
-    ports:
-      - "0.0.0.0:8000:8000"
-    restart: unless-stopped
-    environment:
-    # django
-      DJ_ENVIRONMENT: ${DJ_ENVIRONMENT}
-      DJ_KEY_AUTH: ${DJ_KEY_AUTH}
-      DEBUG: ${DEBUG}
-    # database
-      DEFAULT_DB_NAME: ${ACCOUNT_DB}
-      DEFAULT_DB_USER: ${ACCOUNT_USER}
-      DEFAULT_DB_PASSWORD: ${ACCOUNT_PASSWORD}
-      DEFAULT_DB_HOST: ${ACCOUNT_HOST}
-      DEFAULT_DB_PORT: ${ACCOUNT_PORT}
-    # redis
-      REDIS_BACKEND: ${REDIS_BACKEND}
-      REDIS_LOCATION: ${REDIS_LOCATION}
-      SESSION_ENGINE: ${SESSION_ENGINE}
-      SESSION_CACHE_ALIAS: ${SESSION_CACHE_ALIAS}
-    networks:
-      - microtest
+  # account_api:
+  #   container_name: account_api
+  #   image: microservices/account_api
+  #   build:
+  #     context: ./Accounts
+  #   command: sh -c "/project/run.sh"
+  #   volumes:
+  #     - type: bind
+  #       source: ./Accounts
+  #       target: /project
+  #   depends_on:
+  #     - accountDB
+  #   ports:
+  #     - "0.0.0.0:8000:8000"
+  #   restart: unless-stopped
+  #   environment:
+  #   # django
+  #     DJ_ENVIRONMENT: ${DJ_ENVIRONMENT}
+  #     DJ_KEY_AUTH: ${DJ_KEY_AUTH}
+  #     DEBUG: ${DEBUG}
+  #   # database
+  #     DEFAULT_DB_NAME: ${ACCOUNT_DB}
+  #     DEFAULT_DB_USER: ${ACCOUNT_USER}
+  #     DEFAULT_DB_PASSWORD: ${ACCOUNT_PASSWORD}
+  #     DEFAULT_DB_HOST: ${ACCOUNT_HOST}
+  #     DEFAULT_DB_PORT: ${ACCOUNT_PORT}
+  #   # redis
+  #     REDIS_BACKEND: ${REDIS_BACKEND}
+  #     REDIS_LOCATION: ${REDIS_LOCATION}
+  #     SESSION_ENGINE: ${SESSION_ENGINE}
+  #     SESSION_CACHE_ALIAS: ${SESSION_CACHE_ALIAS}
+  #   networks:
+  #     - microtest
 
 
   accountDB:
@@ -59,7 +60,10 @@ services:
     container_name: accountDB
     networks:
       - microtest
+    ports:
+      - '5432:5432'
     restart: unless-stopped
+
     environment:
       POSTGRES_DB: ${ACCOUNT_DB}
       POSTGRES_USER: ${ACCOUNT_USER}
