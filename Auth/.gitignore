@@ -1,0 +1,16 @@
+*.pyc
+*~
+/.vscode
+__pycache__
+*/__pycache__
+myvenv
+djangoenv/
+db.sqlite3
+.DS_Store
+.env
+env
+venv
+media
+.python-version
+.initialized
+static
