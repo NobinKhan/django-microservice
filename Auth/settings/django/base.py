@@ -91,6 +91,7 @@ DATABASES = {
         'PORT': environ.get('AUTH_PORT'),
     },
 }
+
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 if environ.get("GITHUB_WORKFLOW"):
@@ -106,9 +107,19 @@ if environ.get("GITHUB_WORKFLOW"):
     }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
+# redis cache
+CACHE_TTL = 60 * 1500
+CACHES = {
+    "default": {
+        "BACKEND": environ.get('REDIS_BACKEND'),
+        "LOCATION": environ.get('REDIS_LOCATION'),
+    }
+}
+SESSION_ENGINE = environ.get('SESSION_ENGINE')
+SESSION_CACHE_ALIAS = environ.get('SESSION_CACHE_ALIAS')
 
+
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -123,32 +134,36 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-WSGI_APPLICATION = "config.wsgi.application"
 
-AUTH_USER_MODEL = "users.BaseUser"
+
+# Project wide configs
+ROOT_URLCONF = "config.urls"
+WSGI_APPLICATION = "settings.wsgi.application"
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Custom Auth Config
+AUTH_USER_MODEL = 'account.User'
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/3.0/topics/i18n/
-
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.0/howto/static-files/
-ROOT_URLCONF = "config.urls"
+# media files config
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'static/media'
 
-STATIC_ROOT = path.join(BASE_DIR, "staticfiles")
-STATIC_URL = "/static/"
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static/webfiles'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
 
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "styleguide_example.api.exception_handlers.drf_default_with_modifications_exception_handler",
@@ -159,7 +174,6 @@ REST_FRAMEWORK = {
 
 APP_DOMAIN = env("APP_DOMAIN", default="http://localhost:8000")
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 from config.settings.celery import *  # noqa
 from config.settings.cors import *  # noqa
