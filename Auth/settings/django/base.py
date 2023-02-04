@@ -1,13 +1,13 @@
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+from os import path
+from settings.env import BASE_DIR, env
 
-from os import environ
-from settings.env import BASE_DIR
-
+env.read_env(path.join(BASE_DIR, ".env"))
 
 # Security key, debug and host config
-SECRET_KEY = environ.get('DJANGO_SECRET_KEY')
-DEBUG = True if environ.get('DEBUG', default='False') == 'True' else False
+SECRET_KEY = env('DJANGO_SECRET_KEY', default="django-insecure-!5dukt(mra33vv@e4(ls(u-66tjobl!t^m2aidv7$q6ik-lfow")
+DEBUG = env.bool("DJANGO_DEBUG", default=True)
 ALLOWED_HOSTS = ["*"]
 
 
@@ -84,17 +84,17 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': environ.get('AUTH_DB'),
-        'USER': environ.get('AUTH_USER'),
-        'PASSWORD': environ.get('AUTH_PASSWORD'),
-        'HOST': environ.get('AUTH_HOST'),
-        'PORT': environ.get('AUTH_PORT'),
+        'NAME': env('AUTHDB_DB_NAME'),
+        'USER': env('AUTHDB_USER'),
+        'PASSWORD': env('AUTHDB_PASSWORD'),
+        'HOST': env('AUTHDB_HOST'),
+        'PORT': env('AUTHDB_PORT'),
     },
 }
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
-if environ.get("GITHUB_WORKFLOW"):
+if env("GITHUB_WORKFLOW"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -111,12 +111,12 @@ if environ.get("GITHUB_WORKFLOW"):
 CACHE_TTL = 60 * 1500
 CACHES = {
     "default": {
-        "BACKEND": environ.get('REDIS_BACKEND'),
-        "LOCATION": environ.get('REDIS_LOCATION'),
+        "BACKEND": env('REDIS_BACKEND'),
+        "LOCATION": env('REDIS_LOCATION'),
     }
 }
-SESSION_ENGINE = environ.get('SESSION_ENGINE')
-SESSION_CACHE_ALIAS = environ.get('SESSION_CACHE_ALIAS')
+SESSION_ENGINE = env('SESSION_ENGINE')
+SESSION_CACHE_ALIAS = env('SESSION_CACHE_ALIAS')
 
 
 # Password validation
@@ -140,6 +140,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "settings.wsgi.application"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+APP_DOMAIN = env("APP_DOMAIN", default="http://localhost:8000")
 
 
 # Custom Auth Config
@@ -147,38 +148,33 @@ AUTH_USER_MODEL = 'account.User'
 
 
 # Internationalization
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+USE_TZ = True
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+TIME_ZONE = "UTC"
+LANGUAGE_CODE = "en-us"
 
 
 # media files config
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'static/media'
+MEDIA_ROOT = BASE_DIR / 'media/'
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static/webfiles'
+STATIC_ROOT = BASE_DIR / 'static/'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
+# Import Other Settings
+from settings.others.drf import *
+from settings.others.celery import *  # noqa
+from settings.others.cors import *  # noqa
+from settings.others.files_and_storages import *  # noqa
+from settings.others.pyseto import *  # noqa
+from settings.others.sentry import *  # noqa
+from settings.others.sessions import *  # noqa
 
-REST_FRAMEWORK = {
-    "EXCEPTION_HANDLER": "styleguide_example.api.exception_handlers.drf_default_with_modifications_exception_handler",
-    # 'EXCEPTION_HANDLER': 'styleguide_example.api.exception_handlers.hacksoft_proposed_exception_handler',
-    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
-}
+from settings.others.debug_toolbar.settings import *  # noqa
+from settings.others.debug_toolbar.setup import DebugToolbarSetup  # noqa
 
-APP_DOMAIN = env("APP_DOMAIN", default="http://localhost:8000")
-
-
-from config.settings.celery import *  # noqa
-from config.settings.cors import *  # noqa
-from config.settings.email_sending import *  # noqa
-from config.settings.files_and_storages import *  # noqa
-from config.settings.jwt import *  # noqa
-from config.settings.sentry import *  # noqa
-from config.settings.sessions import *  # noqa
+INSTALLED_APPS, MIDDLEWARE = DebugToolbarSetup.do_settings(INSTALLED_APPS, MIDDLEWARE)

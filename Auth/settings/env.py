@@ -1,12 +1,9 @@
-from pathlib import Path
-from dotenv import load_dotenv
+import environ
 from django.core.exceptions import ImproperlyConfigured
 
+env = environ.Env()
 
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-load_dotenv(BASE_DIR / ".env")
+BASE_DIR = environ.Path(__file__) - 2
 
 
 def env_to_enum(enum_cls, value):
