@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import as_serializer_error
 from rest_framework.views import exception_handler
 
-from styleguide_example.core.exceptions import ApplicationError
+from apps.core.exceptions import ApplicationError
 
 
 def drf_default_with_modifications_exception_handler(exc, ctx):

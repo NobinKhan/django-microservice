@@ -65,10 +65,10 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_DB: ${ACCOUNT_DB}
-      POSTGRES_USER: ${ACCOUNT_USER}
-      POSTGRES_PASSWORD: ${ACCOUNT_PASSWORD}
-      POSTGRES_HOST: ${ACCOUNT_HOST}
+      POSTGRES_DB: ${AUTHDB_DB_NAME}
+      POSTGRES_USER: ${AUTHDB_USER}
+      POSTGRES_PASSWORD: ${AUTHDB_PASSWORD}
+      POSTGRES_HOST: ${AUTHDB_HOST}
     volumes:
       - accountDB_data1:/data/postgres
       - accountDB_data2:/var/lib/postgresql/data

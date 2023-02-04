@@ -1,5 +1,5 @@
 from django.urls import path
 
-from .apis import UserListApi
+from apps.users.apis import UserListApi
 
 urlpatterns = [path("", UserListApi.as_view(), name="list")]

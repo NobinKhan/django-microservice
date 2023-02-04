@@ -28,6 +28,9 @@ djangorestframework = "^3.14.0"
 django-celery-results = "^2.4.0"
 djangorestframework-simplejwt = "^5.2.2"
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^7.0.2"}
+drf-jwt = "^1.19.2"
+factory-boy = "^3.2.1"
+redis = "^4.4.2"
 
 
 [build-system]

@@ -2,8 +2,8 @@ from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 
-from styleguide_example.files.models import File
-from styleguide_example.files.services import FileStandardUploadService
+from apps.files.models import File
+from apps.files.services import FileStandardUploadService
 
 
 class FileForm(forms.ModelForm):

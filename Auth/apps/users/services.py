@@ -2,8 +2,8 @@ from typing import Optional
 
 from django.db import transaction
 
-from styleguide_example.common.services import model_update
-from styleguide_example.users.models import BaseUser
+from apps.common.services import model_update
+from apps.users.models import BaseUser
 
 
 def user_create(

@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
-import styleguide_example.files.utils
+import apps.files.utils
 
 
 class Migration(migrations.Migration):
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('file', models.FileField(blank=True, null=True, upload_to=styleguide_example.files.utils.file_generate_upload_path)),
+                ('file', models.FileField(blank=True, null=True, upload_to=apps.files.utils.file_generate_upload_path)),
                 ('original_file_name', models.TextField()),
                 ('file_name', models.CharField(max_length=255, unique=True)),
                 ('file_type', models.CharField(max_length=255)),

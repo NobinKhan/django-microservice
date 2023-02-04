@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from styleguide_example.testing_examples.models import (
+from apps.testing_examples.models import (
     Roster,
     School,
     SchoolCourse,

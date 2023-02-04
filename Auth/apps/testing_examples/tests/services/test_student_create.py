@@ -2,17 +2,17 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from styleguide_example.testing_examples.services import student_create
-from styleguide_example.testing_examples.tests.factories import (
+from apps.testing_examples.services import student_create
+from apps.testing_examples.tests.factories import (
     SchoolCourseFactory,
     SchoolFactory,
 )
-from styleguide_example.utils.tests import faker
+from apps.utils.tests import faker
 
 
 class StudentCreateTests(TestCase):
-    @patch("styleguide_example.testing_examples.services.students.school_list_school_courses")
-    @patch("styleguide_example.testing_examples.services.students.roster_create")
+    @patch("apps.testing_examples.services.students.school_list_school_courses")
+    @patch("apps.testing_examples.services.students.roster_create")
     def test_student_is_rostered_to_all_active_school_courses(self, roster_create_mock, school_courses_mock):
         school = SchoolFactory()
         start_date = faker.date()

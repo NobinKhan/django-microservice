@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.views import ObtainJSONWebTokenView
 
-from styleguide_example.api.mixins import ApiAuthMixin
-from styleguide_example.authentication.services import auth_logout
-from styleguide_example.users.selectors import user_get_login_data
+from apps.api.mixins import ApiAuthMixin
+from apps.authentication.services import auth_logout
+from apps.users.selectors import user_get_login_data
 
 
 class UserSessionLoginApi(APIView):

@@ -6,16 +6,16 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from styleguide_example.files.enums import FileUploadStorage
-from styleguide_example.files.models import File
-from styleguide_example.files.utils import (
+from apps.files.enums import FileUploadStorage
+from apps.files.models import File
+from apps.files.utils import (
     bytes_to_mib,
     file_generate_local_upload_url,
     file_generate_name,
     file_generate_upload_path,
 )
-from styleguide_example.integrations.aws.client import s3_generate_presigned_post
-from styleguide_example.users.models import BaseUser
+from apps.integrations.aws.client import s3_generate_presigned_post
+from apps.users.models import BaseUser
 
 
 def _validate_file_size(file_obj):

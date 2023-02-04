@@ -1,7 +1,7 @@
 import factory
 
-from styleguide_example.common.models import RandomModel, SimpleModel
-from styleguide_example.utils.tests import faker
+from apps.common.models import RandomModel, SimpleModel
+from apps.utils.tests import faker
 
 
 class RandomModelFactory(factory.django.DjangoModelFactory):

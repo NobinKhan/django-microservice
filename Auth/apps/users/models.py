@@ -5,7 +5,7 @@ from django.contrib.auth.models import BaseUserManager as BUM
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
-from styleguide_example.common.models import BaseModel
+from apps.common.models import BaseModel
 
 # Taken from here:
 # https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#a-full-example

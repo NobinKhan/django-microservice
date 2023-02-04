@@ -1,12 +1,12 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from styleguide_example.api.exception_handlers import (
+from apps.api.exception_handlers import (
     drf_default_with_modifications_exception_handler,
     hacksoft_proposed_exception_handler,
 )
-from styleguide_example.errors.services import trigger_errors
-from styleguide_example.users.services import user_create
+from apps.errors.services import trigger_errors
+from apps.users.services import user_create
 
 
 class TriggerErrorApi(APIView):

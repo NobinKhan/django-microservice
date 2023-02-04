@@ -3,9 +3,9 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from styleguide_example.api.mixins import ApiAuthMixin
-from styleguide_example.files.models import File
-from styleguide_example.files.services import (
+from apps.api.mixins import ApiAuthMixin
+from apps.files.models import File
+from apps.files.services import (
     FileDirectUploadService,
     FileStandardUploadService,
 )

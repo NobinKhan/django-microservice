@@ -3,13 +3,13 @@ from datetime import timedelta
 import factory
 from django.utils.text import slugify
 
-from styleguide_example.testing_examples.models import (
+from apps.testing_examples.models import (
     Roster,
     School,
     SchoolCourse,
     Student,
 )
-from styleguide_example.utils.tests import faker
+from apps.utils.tests import faker
 
 
 class SchoolFactory(factory.django.DjangoModelFactory):

@@ -24,14 +24,23 @@ THIRD_PARTY_APPS = [
     'django_countries',
     "phonenumber_field",
 
-    # "django_celery_results",
-    # "django_celery_beat",
-    # "django_filters",
-    # "django_extensions",
+    "django_celery_results",
+    "django_celery_beat",
+    "django_filters",
+    "django_extensions",
 ]
 
 LOCAL_APPS = [
+    "apps.core.apps.CoreConfig",
+    "apps.common.apps.CommonConfig",
+    "apps.tasks.apps.TasksConfig",
+    "apps.api.apps.ApiConfig",
     "apps.users.apps.UsersConfig",
+    "apps.errors.apps.ErrorsConfig",
+    "apps.testing_examples.apps.TestingExamplesConfig",
+    "apps.integrations.apps.IntegrationsConfig",
+    "apps.files.apps.FilesConfig",
+    "apps.blog_examples.apps.BlogExamplesConfig",
 ]
 
 INSTALLED_APPS = [
@@ -137,14 +146,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Project wide configs
-ROOT_URLCONF = "config.urls"
+ROOT_URLCONF = "settings.urls"
 WSGI_APPLICATION = "settings.wsgi.application"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APP_DOMAIN = env("APP_DOMAIN", default="http://localhost:8000")
 
 
 # Custom Auth Config
-AUTH_USER_MODEL = 'account.User'
+AUTH_USER_MODEL = 'users.BaseUser'
 
 
 # Internationalization
@@ -157,11 +166,11 @@ LANGUAGE_CODE = "en-us"
 
 # media files config
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media/'
+MEDIA_ROOT = path.join(BASE_DIR, 'media')
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static/'
+STATIC_ROOT = path.join(BASE_DIR, 'static')
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
