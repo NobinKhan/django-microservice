@@ -1,10 +1,12 @@
+from random import randint
 from django.apps import apps
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import load_backend, get_backends
-from django.contrib.auth.models import BaseUserManager as BUM
+from django.contrib.auth.models import UserManager as BUM
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
 
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -16,7 +18,7 @@ def userDirectoryPath(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
 
 
-class BaseUserManager(BUM):
+class UserManager(BUM):
     def create_user(self, phone=None, email=None, username=None, password=None, is_active=True, is_staff=False, **extra_fields):
         extra_fields.setdefault('is_superuser', False)
         
@@ -26,16 +28,19 @@ class BaseUserManager(BUM):
             username = phone
             extra_fields['is_active'] = False
         if email:
-            email = self.normalize_email(email.lower())
+            email = self.normalize_email()
+        if not email:
+            email = None
 
         GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
         username = GlobalUserModel.normalize_username(username)
             
-        if 'password1' in extra_fields:
-            extra_fields.pop('password1')
-            extra_fields.pop('password2')
-        groups = extra_fields.pop('groups')
-        user_permissions = extra_fields.pop('user_permissions')
+        # if 'password1' in extra_fields:
+        #     extra_fields.pop('password1')
+        #     extra_fields.pop('password2')
+        # if 'groups' in extra_fields:
+        #     groups = extra_fields.pop('groups')
+        # user_permissions = extra_fields.pop('user_permissions')
 
         user = self.model(username=username, email=email, phone=phone, is_active=is_active, is_staff=is_staff, **extra_fields)
         if user.username == user.phone:
@@ -98,7 +103,7 @@ class BaseUserManager(BUM):
         return self.none()
 
 
-class User(BaseModel, AbstractBaseUser, PermissionsMixin):
+class User(BaseModel, AbstractUser, PermissionsMixin):
     """
     An abstract base class implementing a fully featured User model with
     admin-compliant permissions.
@@ -122,7 +127,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     password = models.CharField(_("password"), max_length=128, null=True, blank=True)
     email = models.EmailField(_('Email'), unique=True, null=True, blank=True)
     phone = PhoneNumberField(verbose_name=_("Phone"), unique=True, region='BD', blank=True, null=True)
-    device_id = models.CharField(max_length=1000, null=True, blank=True)
+    firebase_device_id = models.CharField(max_length=1000, null=True, blank=True)
     is_active = models.BooleanField(
         _('active'),
         default=True,
@@ -143,12 +148,11 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         null=True, blank=True
     )
     is_staff = models.BooleanField(default=False, null=True, blank=True)
-    date_joined = models.DateTimeField(_('date joined'), auto_now=True, null=True, blank=True)
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'username'
     # REQUIRED_FIELDS = ['name']
-    objects = BaseUserManager()
+    objects = UserManager()
 
     class Meta:
         verbose_name = _('user')
@@ -160,6 +164,153 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
        return self.username or "No_Username"
+
+
+class Profile(BaseModel):
+    # Choices With enum functionality
+    class Gender(models.TextChoices):
+        NONE = 'None', _('Not Selected')
+        MALE = 'Male', _('Male')
+        FEMALE = 'Female', _('Female')
+        OTHER = 'Other', _('Other')
+    
+    class AccountStatus(models.TextChoices):
+        NEW_CREATED = 'NewCreated', _('Newly Created Account')
+        DELETED = 'Deleted', _('Account Deleted')
+        RE_OPENED = 'ReOpened', _('Account Created Again')
+        BANNED = 'Banned', _('Banned Account')
+
+    class Membership(models.TextChoices):
+        NORMAL = 'Normal'
+        BRONZE = 'Bronze'
+        SILVER = 'Silver'
+        GOLD = 'Gold'
+        PLATINUM = 'Platinum'
+
+    user = models.OneToOneField(User, related_name="profile", on_delete=models.PROTECT, null=True, blank=True)
+    name = models.CharField(_('name'), max_length=150, blank=True, null=True)
+    date_of_birth = models.DateField(verbose_name=_("Date of birth"), null=True, blank=True)
+    gender = models.CharField(verbose_name=_("Gender"), max_length=20, choices=Gender.choices, default=Gender.NONE, null=True, blank=True)
+    photo = models.FileField(verbose_name=_("Photo"), upload_to='photos/', default='photos/default-user-avatar.png', null=True, blank=True)
+    membership = models.CharField(verbose_name=_("Membership"), max_length=50, default=Membership.NORMAL, choices=Membership.choices, null=True, blank=True)
+
+    total_spend_amount = models.FloatField(verbose_name=_("Total Spend Amount"), default=0, null=True, blank=True)
+    point_used = models.FloatField(verbose_name=_("Point Used"), default=0, null=True, blank=True)
+    current_point = models.FloatField(verbose_name=_("Current Point"), default=0, null=True, blank=True)
+
+    status = models.CharField(verbose_name=_("User Status"), max_length=10, default=AccountStatus.NEW_CREATED, choices=AccountStatus.choices, null=True, blank=True)
+    is_deleted = models.BooleanField(
+        _('Deleted Account'),
+        default=False,
+        help_text=_(
+            "If user deleted than this field will change to True, but reopen account won\'t change anything. "
+        ),
+        null=True, blank=True
+    )
+
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user",],
+                name="unique_profile"
+            )
+        ]
+    
+    def __str__(self):
+        if not self.user:
+            return _('User_Not_Found')
+        return self.user.__str__() 
+
+
+class Address(BaseModel):
+    profile = models.ForeignKey(Profile, related_name="addresses", on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(
+        verbose_name=_('Address Name'),
+        max_length=150,
+        unique=True,
+        help_text=_('Give a name to this address like Home or Office'),
+        null=True,
+        blank=True
+    )
+    flat =  models.CharField(verbose_name=_("Flat Number"), max_length=15, null=True, blank=True)
+    house =  models.CharField(verbose_name=_("House Number"), max_length=20, null=True, blank=True)
+    address = models.CharField(verbose_name=_("Address"), max_length=1024, null=True, blank=True)
+    zip_code = models.CharField(verbose_name=_("Zip Code"), max_length=12, null=True, blank=True)
+    city = models.CharField(verbose_name=_("City"), max_length=50, null=True, blank=True)
+    country = CountryField(verbose_name=_("Country"), blank=True, null=True)
+    longitude = models.CharField(max_length=250, null=True, blank=True)
+    latitude = models.CharField(max_length=250, null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["profile", 'name'],
+                name="unique_address"
+            )
+        ]
+
+    def __str__(self):
+        return self.name or 'No_Name'
+
+
+class OTPtoken(BaseModel):
+
+    class Perpose(models.TextChoices):
+        OTHER = 'Other'
+        LOGIN = 'Login'
+        NO_USE = 'NoUse'
+        REGISTER = 'Register'
+        PASSWORD_RESET = 'PasswordReset'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    perpose = models.CharField(
+        verbose_name=_('Purpose of this token'),
+        max_length=150,
+        default=Perpose.NO_USE,
+        choices=Perpose.choices,
+        help_text=_('For which perpose this token is going to be use.'),
+        null=True,
+        blank=True
+    )
+    token = models.PositiveIntegerField(unique=True, null=True, blank=True)
+    is_used = models.BooleanField(
+        _('Is Used'),
+        default=False,
+        help_text=_(
+            'Designates whether this token used or not. '
+            'Select this to make it not usable.'
+        ),
+        null=True, blank=True
+    )
+
+    class Meta:
+        verbose_name = _('OTPToken')
+        verbose_name_plural = _('OTPtokens')
+
+    def __str__(self):
+        if not self.token or not self.type:
+            return 'Invalid Token'
+        return f"{self.type}-{self.token}"
+
+    def clean(self):
+        if self._state.adding == True:
+            if not self.perpose:
+                raise ValidationError("You must select token perpose")
+            if not self.user and self.perpose != self.Perpose.OTHER:
+                raise ValidationError("OTP Perpose can be only Other.")
+
+        if self.id:
+            old = OTPtoken.objects.get(pk=self.pk)
+            if old.perpose != self.Perpose.OTHER and old.user:
+                raise ValidationError("OTP Token Object is Read-Only, You can't change.")
+
+    def save(self, *args, **kwargs):
+        if self._state.adding == True:
+            self.token = randint(100000, 999999)
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
 
 
 

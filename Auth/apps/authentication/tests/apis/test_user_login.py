@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from styleguide_example.users.models import BaseUser
+from styleguide_example.users.models import User
 from styleguide_example.users.services import user_create
 
 
@@ -16,7 +16,7 @@ class UserSessionLoginTests(TestCase):
         self.me_url = reverse("api:authentication:me")
 
     def test_non_existing_user_cannot_login(self):
-        self.assertEqual(0, BaseUser.objects.count())
+        self.assertEqual(0, User.objects.count())
 
         data = {"email": "test@hacksoft.io", "password": "hacksoft"}
 
@@ -90,7 +90,7 @@ class UserJwtLoginTests(TestCase):
         self.me_url = reverse("api:authentication:me")
 
     def test_non_existing_user_cannot_login(self):
-        self.assertEqual(0, BaseUser.objects.count())
+        self.assertEqual(0, User.objects.count())
 
         data = {"email": "test@hacksoft.io", "password": "hacksoft"}
 

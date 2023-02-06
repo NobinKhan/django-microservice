@@ -8,7 +8,7 @@ from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError as RestValidationError
 
 from apps.core.exceptions import ApplicationError
-from apps.users.models import BaseUser
+from apps.users.models import User
 
 
 class NestedSerializer(serializers.Serializer):
@@ -39,7 +39,7 @@ def trigger_django_404():
 
 
 def trigger_model_clean():
-    user = BaseUser()
+    user = User()
     user.full_clean()
 
 

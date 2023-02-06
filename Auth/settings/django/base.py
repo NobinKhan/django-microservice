@@ -31,6 +31,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "apps.authentication.apps.AuthenticationConfig",
     "apps.core.apps.CoreConfig",
     "apps.common.apps.CommonConfig",
     "apps.tasks.apps.TasksConfig",
@@ -153,7 +154,7 @@ APP_DOMAIN = env("APP_DOMAIN", default="http://localhost:8000")
 
 
 # Custom Auth Config
-AUTH_USER_MODEL = 'users.BaseUser'
+AUTH_USER_MODEL = 'users.User'
 
 
 # Internationalization

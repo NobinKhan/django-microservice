@@ -16,3 +16,4 @@ media
 static
 Auth/.env
 Auth/poetry.lock
+Auth/check.py

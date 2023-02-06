@@ -1,9 +1,9 @@
 import django_filters
 
-from apps.users.models import BaseUser
+from apps.users.models import User
 
 
-class BaseUserFilter(django_filters.FilterSet):
+class UserFilter(django_filters.FilterSet):
     class Meta:
-        model = BaseUser
-        fields = ("id", "email", "is_admin")
+        model = User
+        fields = ("id", "email", "is_staff", 'username', 'phone', 'is_active')

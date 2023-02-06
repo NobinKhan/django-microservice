@@ -5,7 +5,7 @@ from apps.api.pagination import (
     LimitOffsetPagination,
     get_paginated_response,
 )
-from apps.users.models import BaseUser
+from apps.users.models import User
 from apps.users.selectors import user_list
 
 
@@ -21,7 +21,7 @@ class UserListApi(APIView):
 
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
-            model = BaseUser
+            model = User
             fields = ("id", "email", "is_admin")
 
     def get(self, request):

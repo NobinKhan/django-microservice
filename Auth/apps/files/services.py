@@ -15,7 +15,7 @@ from apps.files.utils import (
     file_generate_upload_path,
 )
 from apps.integrations.aws.client import s3_generate_presigned_post
-from apps.users.models import BaseUser
+from apps.users.models import User
 
 
 def _validate_file_size(file_obj):
@@ -36,7 +36,7 @@ class FileStandardUploadService:
     2. The ability to reuse `_infer_file_name_and_type` (which can also be an util)
     """
 
-    def __init__(self, user: BaseUser, file_obj):
+    def __init__(self, user: User, file_obj):
         self.user = user
         self.file_obj = file_obj
 
@@ -103,7 +103,7 @@ class FileDirectUploadService:
     1. The namespace
     """
 
-    def __init__(self, user: BaseUser):
+    def __init__(self, user: User):
         self.user = user
 
     @transaction.atomic

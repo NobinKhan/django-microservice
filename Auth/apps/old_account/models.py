@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import load_backend, get_backends
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import AbstractUser, PermissionsMixin, UserManager
 # from django.core.mail import send_mail
 
 from django_countries.fields import CountryField
@@ -17,7 +17,7 @@ def userDirectoryPath(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
 
 
-class UserManager(BaseUserManager):
+class UserManager(UserManager):
     use_in_migrations = True
 
     def _create_user(self, phone=None, email=None, username=None, password=None, **extra_fields):
@@ -104,7 +104,7 @@ class UserManager(BaseUserManager):
         return self.none()
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractUser, PermissionsMixin):
     """
     An abstract base class implementing a fully featured User model with
     admin-compliant permissions.

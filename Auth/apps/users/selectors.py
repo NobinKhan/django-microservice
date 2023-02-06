@@ -1,10 +1,10 @@
 from django.db.models.query import QuerySet
 
-from apps.users.filters import BaseUserFilter
-from apps.users.models import BaseUser
+from apps.users.filters import UserFilter
+from apps.users.models import User
 
 
-def user_get_login_data(*, user: BaseUser):
+def user_get_login_data(*, user: User):
     return {
         "id": user.id,
         "email": user.email,
@@ -14,9 +14,9 @@ def user_get_login_data(*, user: BaseUser):
     }
 
 
-def user_list(*, filters=None) -> QuerySet[BaseUser]:
+def user_list(*, filters=None) -> QuerySet[User]:
     filters = filters or {}
 
-    qs = BaseUser.objects.all()
+    qs = User.objects.all()
 
-    return BaseUserFilter(filters, qs).qs
+    return UserFilter(filters, qs).qs

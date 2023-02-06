@@ -9,7 +9,7 @@ from styleguide_example.api.pagination import (
     LimitOffsetPagination,
     get_paginated_response,
 )
-from styleguide_example.users.models import BaseUser
+from styleguide_example.users.models import User
 from styleguide_example.users.services import user_create
 
 
@@ -19,11 +19,11 @@ class ExampleListApi(APIView):
 
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
-            model = BaseUser
+            model = User
             fields = ("id", "email")
 
     def get(self, request):
-        queryset = BaseUser.objects.order_by("id")
+        queryset = User.objects.order_by("id")
 
         response = get_paginated_response(
             pagination_class=self.Pagination,
@@ -51,7 +51,7 @@ class GetPaginatedResponseTests(TestCase):
             {
                 "limit": 1,
                 "offset": 0,
-                "count": BaseUser.objects.count(),
+                "count": User.objects.count(),
                 "next": "http://testserver/some/path?limit=1&offset=1",
                 "previous": None,
                 "results": [
@@ -74,7 +74,7 @@ class GetPaginatedResponseTests(TestCase):
             {
                 "limit": 1,
                 "offset": 1,
-                "count": BaseUser.objects.count(),
+                "count": User.objects.count(),
                 "next": None,
                 "previous": "http://testserver/some/path?limit=1",
                 "results": [
