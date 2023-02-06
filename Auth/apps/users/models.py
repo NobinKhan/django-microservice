@@ -4,9 +4,10 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import load_backend, get_backends
-from django.contrib.auth.models import UserManager as BUM
+# from django.contrib.auth.models import UserManager as BUM
+from django.contrib.auth.base_user import BaseUserManager as BUM
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser
 
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -19,30 +20,20 @@ def userDirectoryPath(instance, filename):
 
 
 class UserManager(BUM):
-    def create_user(self, phone=None, email=None, username=None, password=None, is_active=True, is_staff=False, **extra_fields):
+    def create_user(self, phone=None, email=None, username=None, password=None, is_active=False, is_staff=False, **extra_fields):
         extra_fields.setdefault('is_superuser', False)
-        
         if not username and not phone:
-            raise ValueError(_('Users must have phone number or username'))
+            raise ValidationError(_('Users must have phone number or username'))
         if phone and not username:
             username = phone
             extra_fields['is_active'] = False
         if email:
-            email = self.normalize_email()
-        if not email:
-            email = None
+            email = self.normalize_email(email)
 
         GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
         username = GlobalUserModel.normalize_username(username)
-            
-        # if 'password1' in extra_fields:
-        #     extra_fields.pop('password1')
-        #     extra_fields.pop('password2')
-        # if 'groups' in extra_fields:
-        #     groups = extra_fields.pop('groups')
-        # user_permissions = extra_fields.pop('user_permissions')
 
-        user = self.model(username=username, email=email, phone=phone, is_active=is_active, is_staff=is_staff, **extra_fields)
+        user = self.model(username=username, email=email, phone=phone, is_staff=is_staff, **extra_fields)
         if user.username == user.phone:
             user.set_unusable_password()
         else:
@@ -103,7 +94,7 @@ class UserManager(BUM):
         return self.none()
 
 
-class User(BaseModel, AbstractUser, PermissionsMixin):
+class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     """
     An abstract base class implementing a fully featured User model with
     admin-compliant permissions.
