@@ -1,10 +1,10 @@
 from random import randint
+
 from django.apps import apps
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import load_backend, get_backends
-# from django.contrib.auth.models import UserManager as BUM
 from django.contrib.auth.base_user import BaseUserManager as BUM
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser
@@ -14,9 +14,10 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 from apps.common.models import BaseModel
 
+
 def userDirectoryPath(instance, filename):
     # file will be uploaded to MEDIA_ROOT / user_<id>/<filename>
-    return 'user_{0}/{1}'.format(instance.user.id, filename)
+    return 'photos/profile_photo/user_{0}/{1}'.format(instance.user.id, filename)
 
 
 class UserManager(BUM):
@@ -155,7 +156,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
        return str(self.username) or "No_Username"
-
+    
 
 class Profile(BaseModel):
     # Choices With enum functionality
@@ -182,7 +183,7 @@ class Profile(BaseModel):
     name = models.CharField(_('name'), max_length=150, blank=True, null=True)
     date_of_birth = models.DateField(verbose_name=_("Date of birth"), null=True, blank=True)
     gender = models.CharField(verbose_name=_("Gender"), max_length=20, choices=Gender.choices, default=Gender.NONE, null=True, blank=True)
-    photo = models.FileField(verbose_name=_("Photo"), upload_to='photos/', default='photos/default-user-avatar.png', null=True, blank=True)
+    photo = models.FileField(verbose_name=_("Photo"), upload_to=userDirectoryPath, default='photos/default-user-avatar.png', null=True, blank=True)
     membership = models.CharField(verbose_name=_("Membership"), max_length=50, default=Membership.NORMAL, choices=Membership.choices, null=True, blank=True)
 
     total_spend_amount = models.FloatField(verbose_name=_("Total Spend Amount"), default=0, null=True, blank=True)
@@ -280,9 +281,9 @@ class OTPtoken(BaseModel):
         verbose_name_plural = _('OTPtokens')
 
     def __str__(self):
-        if not self.token or not self.type:
+        if not self.token or not self.perpose:
             return 'Invalid Token'
-        return f"{self.type}-{self.token}"
+        return f"{self.perpose}-{self.token}"
 
     def clean(self):
         if self._state.adding == True:

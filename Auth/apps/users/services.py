@@ -14,7 +14,6 @@ def user_create(*, phone: PhoneNumber = None, username: str = None, email: str =
     if 'groups' in extra_fields:
         groups = extra_fields.pop('groups')
         user_permissions = extra_fields.pop('user_permissions')
-    print("service before called")
     user = User.objects.create_user(
         phone=phone,
         username=username,
@@ -24,8 +23,6 @@ def user_create(*, phone: PhoneNumber = None, username: str = None, email: str =
         password=password,
         **extra_fields
     )
-    print(user.id)
-
     return user
 
 

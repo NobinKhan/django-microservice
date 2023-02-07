@@ -89,25 +89,10 @@ class UserCreationForm(forms.ModelForm):
                 self.add_error("password2", error)
 
     def save(self, commit=True):
-        password = self.cleaned_data["password1"]
-        print(f"form.py -> form.save -> before_super_call -> commit-{commit}")
         user = super().save(commit=False)
-        print(f"form.py -> form.save -> after_super_call -> commit-{commit} -> user_id-{user.id}")
         if commit:
             user.save()
-            print(f"form.py -> form.save -> after_super_call(if_block) -> commit-{commit} -> user_id-{user.id}")
         return user
-
-
-    # def save(self, commit: bool = ...) -> Any:
-    #     print("\n User creation Form called")
-    #     user = user_create(**self.cleaned_data)
-    #     return user
-        # try:
-        #     user = user_create(**self.cleaned_data)
-        # except ValidationError as exc:
-        #     self.add_error(field=None, error=exc)
-        # return user
 
 
 class UserChangeForm(forms.ModelForm):
