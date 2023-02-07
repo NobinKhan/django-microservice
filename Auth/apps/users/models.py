@@ -154,7 +154,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         return self.created_at
 
     def __str__(self):
-       return self.username or "No_Username"
+       return str(self.username) or "No_Username"
 
 
 class Profile(BaseModel):

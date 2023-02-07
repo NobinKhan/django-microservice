@@ -36,12 +36,14 @@ class UserCreationForm(forms.ModelForm):
         strip=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
         help_text=password_validation.password_validators_help_text_html(),
+        empty_value=False
     )
     password2 = forms.CharField(
         label=_("Password confirmation"),
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
         strip=False,
         help_text=_("Enter the same password as before, for verification."),
+        empty_value=False
     )
 
     class Meta:
@@ -68,6 +70,15 @@ class UserCreationForm(forms.ModelForm):
 
     def _post_clean(self):
         super()._post_clean()
+
+        # Validate the username and phone fields.
+        username = self.cleaned_data.get("username")
+        phone = self.cleaned_data.get("phone")
+        if not username and not phone:
+            self.add_error(field=None, error=_('The given user must have phone number or username'))
+        if phone and not username:
+            self.instance.username = phone
+        
         # Validate the password after self.instance is updated with form data
         # by super().
         password = self.cleaned_data.get("password2")
@@ -77,18 +88,21 @@ class UserCreationForm(forms.ModelForm):
             except ValidationError as error:
                 self.add_error("password2", error)
 
-    # def save(self, commit=True):
-    #     user = super().save(commit=False)
-    #     user.set_password(self.cleaned_data["password1"])
-    #     if commit:
-    #         user.save()
-    #     return user
-
-
-    def save(self, commit: bool = ...) -> Any:
-        print("\n User creation Form")
-        user = user_create(**self.cleaned_data)
+    def save(self, commit=True):
+        password = self.cleaned_data["password1"]
+        print(f"form.py -> form.save -> before_super_call -> commit-{commit}")
+        user = super().save(commit=False)
+        print(f"form.py -> form.save -> after_super_call -> commit-{commit} -> user_id-{user.id}")
+        if commit:
+            user.save()
+            print(f"form.py -> form.save -> after_super_call(if_block) -> commit-{commit} -> user_id-{user.id}")
         return user
+
+
+    # def save(self, commit: bool = ...) -> Any:
+    #     print("\n User creation Form called")
+    #     user = user_create(**self.cleaned_data)
+    #     return user
         # try:
         #     user = user_create(**self.cleaned_data)
         # except ValidationError as exc:
