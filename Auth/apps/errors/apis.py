@@ -6,7 +6,7 @@ from apps.api.exception_handlers import (
     hacksoft_proposed_exception_handler,
 )
 from apps.errors.services import trigger_errors
-from apps.users.services import user_create
+from apps.users.services import create_user
 
 
 class TriggerErrorApi(APIView):
@@ -22,8 +22,8 @@ class TriggerErrorApi(APIView):
 class TriggerValidateUniqueErrorApi(APIView):
     def get(self, request):
         # Due to the fiddling with transactions, this example a different API
-        user_create(email="unique@hacksoft.io", password="user")
-        user_create(email="unique@hacksoft.io", password="user")
+        create_user(email="unique@hacksoft.io", password="user")
+        create_user(email="unique@hacksoft.io", password="user")
 
         return Response()
 

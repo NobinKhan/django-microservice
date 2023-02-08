@@ -1,13 +1,11 @@
 import unicodedata
-from typing import Any
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.forms import ReadOnlyPasswordHashField, UserCreationForm as UCF
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from .models import User
-from apps.users.services import user_create
+from apps.users.models import User
 
 
 class UsernameField(forms.CharField):

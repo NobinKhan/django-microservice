@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as UA
 from django.core.exceptions import ValidationError
 from .forms import UserCreationForm, UserChangeForm
 
-from apps.users.services import user_create
+from apps.users.services import create_user
 from apps.users.models import User, Profile, Address, OTPtoken
 
 
@@ -39,7 +39,7 @@ class UserAdmin(UA):
     add_form = UserCreationForm
 
     ordering = ('-id', )
-    inlines = (ProfileInline,)
+    inlines = (ProfileInline,AddressInline)
     search_fields = ("email", "username", "phone")
     list_filter = ("is_active", "is_staff", "is_superuser")
     list_display = ("username", "phone", "is_staff", "is_superuser", "is_active", "created_at", "updated_at")
@@ -93,7 +93,7 @@ class UserAdmin(UA):
             return super().save_model(request, obj, form, change)
 
         try:
-            user_create(**form.cleaned_data)
+            create_user(**form.cleaned_data)
         except ValidationError as exc:
             self.message_user(request, str(exc), messages.ERROR)
 
@@ -105,7 +105,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
-    list_display = ('id', 'profile', 'name')
+    list_display = ('id', 'user', 'name')
 
 
 @admin.register(OTPtoken)

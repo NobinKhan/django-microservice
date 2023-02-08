@@ -23,34 +23,25 @@ def userDirectoryPath(instance, filename):
 class UserManager(BUM):
     def create_user(self, phone=None, email=None, username=None, password=None, is_active=False, is_staff=False, **extra_fields):
         extra_fields.setdefault('is_superuser', False)
-        if not username and not phone:
-            raise ValidationError(_('Users must have phone number or username'))
-        if phone and not username:
-            username = phone
-            extra_fields['is_active'] = False
+
+        # validation
         if email:
             email = self.normalize_email(email)
+        if not username:
+            raise ValidationError(_('Users must have username'))
 
         GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
         username = GlobalUserModel.normalize_username(username)
 
+        # creating user
         user = self.model(username=username, email=email, phone=phone, is_staff=is_staff, **extra_fields)
-        if user.username == user.phone:
-            user.set_unusable_password()
-        else:
+        if password:
             user.set_password(password)
-        
-        # if password is not None:
-        #     user.set_password(password)
-        # else:
-        #     user.set_unusable_password()
+        else:
+            user.set_unusable_password()
 
         user.full_clean()
         user.save(using=self._db)
-
-        # user.groups.set(groups)
-        # user.user_permissions.set(user_permissions)
-        # user.save()
         return user
 
     def create_superuser(self, email=None, username=None, password=None, **extra_fields):
@@ -156,7 +147,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
        return str(self.username) or "No_Username"
-    
+
 
 class Profile(BaseModel):
     # Choices With enum functionality
@@ -216,7 +207,7 @@ class Profile(BaseModel):
 
 
 class Address(BaseModel):
-    profile = models.ForeignKey(Profile, related_name="addresses", on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, related_name="addresses", on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(
         verbose_name=_('Address Name'),
         max_length=150,
@@ -237,7 +228,7 @@ class Address(BaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["profile", 'name'],
+                fields=["user", 'name'],
                 name="unique_address"
             )
         ]
@@ -302,8 +293,4 @@ class OTPtoken(BaseModel):
             self.token = randint(100000, 999999)
         self.full_clean()
         return super().save(*args, **kwargs)
-
-
-
-
 
