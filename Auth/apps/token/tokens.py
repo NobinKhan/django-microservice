@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .exceptions import TokenBackendError, TokenError
 from .settings import api_settings
-from .token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from .utils import aware_utcnow, datetime_from_epoch, datetime_to_epoch, format_lazy
 
 

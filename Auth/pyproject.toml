@@ -31,6 +31,7 @@ django-celery-results = "^2.4.0"
 djangorestframework-simplejwt = "^5.2.2"
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^7.0.2"}
 drf-jwt = "^1.19.2"
+pyseto = "^1.7.1"
 
 
 [build-system]

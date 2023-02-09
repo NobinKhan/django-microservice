@@ -31,6 +31,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "apps.token.apps.TokenConfig",
     "apps.authentication.apps.AuthenticationConfig",
     "apps.core.apps.CoreConfig",
     "apps.common.apps.CommonConfig",
