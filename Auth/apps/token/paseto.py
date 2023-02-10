@@ -1,18 +1,40 @@
 import pyseto
-from pyseto import Key
+from apps.token.models import RsaKey
 
 
 
-secret_key_pem = b"-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEILTL+0PfTOIQcn2VPkpxMwf6Gbt9n4UEFDjZ4RuUKjd0\n-----END PRIVATE KEY-----"
-public_key_pem = b"-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAHrnbu7wEfAP9cGBOAHHwmH4Wsot1ciXBHwBBXQ4gsaI=\n-----END PUBLIC KEY-----"
-secret_key = Key.new(version=4, purpose="public", key=secret_key_pem)
-token = pyseto.encode(
-    secret_key,
-    '{"data": "this is a signed message", "exp": "2022-01-01T00:00:00+00:00"}',
-)
-token
-B'v4.public.eyJkYXRhIjogInRoaXMgaXMgYSBzaWduZWQgbWVzc2FnZSIsICJleHAiOiAiMjAyMi0wMS0wMVQwMDowMDowMCswMDowMCJ9l1YiKei2FESvHBSGPkn70eFO1hv3tXH0jph1IfZyEfgm3t1DjkYqD5r4aHWZm1eZs_3_bZ9pBQlZGp0DPSdzDg'
-public_key = Key.new(4, "public", public_key_pem)
-decoded = pyseto.decode(public_key, token)
-decoded.payload
-B'{"data": "this is a signed message", "exp": "2022-01-01T00:00:00+00:00"}'
+def generate_access_token(payload: dict=None, rsa: RsaKey=None):
+    if not bool(payload) or not rsa or not rsa.active:
+        return None
+
+    # secret keys
+    # rsa = RsaKey.objects.filter(active=True)[0]
+    pem_private_key = rsa.private.tobytes()
+    # pem_public_key = rsa.public.tobytes()
+
+    # generate secret key
+    secret_key = pyseto.Key.new(version=4, purpose="public", key=pem_private_key)
+
+    # get access token with payload
+    access_token = pyseto.encode(secret_key, payload=payload)
+
+    return access_token
+
+"""
+    # client server
+    # generate public key
+    public_key = pyseto.Key.new(version=4, purpose="public", key=pem_public_key)
+    decoded = pyseto.decode(secret_key, access_token)
+
+    # check
+    print(f"\npaseto_secret_key = {secret_key}\n")
+    print(f"aceess_token = {access_token}\n")
+    print(f"public_key = {public_key}\n")
+    print(f"decode = {decoded}\n")
+    print(f"decoded.payload = {decoded.payload}\n")
+    print(f"payload = {payload}\n")
+    con = decoded.payload.decode('utf-8')
+    print(f"string = {con}\n")
+    print(f"dict = {json.loads(con)}\n")
+    print(f"type = {type(con)}\n")
+"""
