@@ -1,14 +1,15 @@
+import json
 import pyseto
 from apps.token.models import RsaKey
 
 
 
-def generate_access_token(payload: dict=None, rsa: RsaKey=None):
-    if not bool(payload) or not rsa or not rsa.active:
+def encode_access_token(payload: dict=None):
+    if not bool(payload):
         return None
 
     # secret keys
-    # rsa = RsaKey.objects.filter(active=True)[0]
+    rsa = RsaKey.objects.filter(active=True)[0]
     pem_private_key = rsa.private.tobytes()
     # pem_public_key = rsa.public.tobytes()
 
@@ -20,11 +21,24 @@ def generate_access_token(payload: dict=None, rsa: RsaKey=None):
 
     return access_token
 
+
+def decode_access_token(token=None):
+    # secret keys
+    rsa = RsaKey.objects.filter(active=True)[0]
+    # pem_private_key = rsa.private.tobytes()
+    pem_public_key = rsa.public.tobytes()
+
+    # decode access token
+    secret_key = pyseto.Key.new(version=4, purpose="public", key=pem_public_key)
+    decode = pyseto.decode(secret_key, token)
+    payload = decode.payload.decode('utf-8')
+
+    return json.loads(payload)
+
+
 """
     # client server
     # generate public key
-    public_key = pyseto.Key.new(version=4, purpose="public", key=pem_public_key)
-    decoded = pyseto.decode(secret_key, access_token)
 
     # check
     print(f"\npaseto_secret_key = {secret_key}\n")

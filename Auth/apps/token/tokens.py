@@ -9,6 +9,13 @@ from .exceptions import TokenBackendError, TokenError
 from .settings import api_settings
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from .utils import aware_utcnow, datetime_from_epoch, datetime_to_epoch, format_lazy
+from apps.token.paseto import encode_access_token, decode_access_token
+
+
+USER_ID_FIELD = 'id'
+USER_ID_CLAIM = 'user_id'
+JTI_CLAIM = 'jti'
+TOKEN_TYPE_CLAIM = 'token_type'
 
 
 class Token:
@@ -34,12 +41,9 @@ class Token:
 
         # Set up token
         if token is not None:
-            # An encoded token was provided
-            token_backend = self.get_token_backend()
 
-            # Decode token
             try:
-                self.payload = token_backend.decode(token, verify=verify)
+                self.payload = decode_access_token(token=token)
             except TokenBackendError:
                 raise TokenError(_("Token is invalid or expired"))
 
@@ -47,7 +51,7 @@ class Token:
                 self.verify()
         else:
             # New token.  Skip all the verification steps.
-            self.payload = {api_settings.TOKEN_TYPE_CLAIM: self.token_type}
+            self.payload = {}
 
             # Set "exp" and "iat" claims with default value
             self.set_exp(from_time=self.current_time, lifetime=self.lifetime)
@@ -78,7 +82,7 @@ class Token:
         """
         Signs and returns a token as a base64 encoded string.
         """
-        return self.get_token_backend().encode(self.payload)
+        return encode_access_token(payload=self.payload)
 
     def verify(self):
         """
@@ -95,14 +99,10 @@ class Token:
         # If the defaults are not None then we should enforce the
         # requirement of these settings.As above, the spec labels
         # these as optional.
-        if (
-            api_settings.JTI_CLAIM is not None
-            and api_settings.JTI_CLAIM not in self.payload
-        ):
+        if JTI_CLAIM not in self.payload:
             raise TokenError(_("Token has no id"))
 
-        if api_settings.TOKEN_TYPE_CLAIM is not None:
-
+        if TOKEN_TYPE_CLAIM is not None:
             self.verify_token_type()
 
     def verify_token_type(self):
@@ -110,7 +110,7 @@ class Token:
         Ensures that the token type claim is present and has the correct value.
         """
         try:
-            token_type = self.payload[api_settings.TOKEN_TYPE_CLAIM]
+            token_type = self.payload[TOKEN_TYPE_CLAIM]
         except KeyError:
             raise TokenError(_("Token has no type"))
 
@@ -126,7 +126,7 @@ class Token:
         See here:
         https://tools.ietf.org/html/rfc7519#section-4.1.7
         """
-        self.payload[api_settings.JTI_CLAIM] = uuid4().hex
+        self.payload[JTI_CLAIM] = uuid4().hex
 
     def set_exp(self, claim="exp", from_time=None, lifetime=None):
         """
@@ -180,28 +180,14 @@ class Token:
         Returns an authorization token for the given user that will be provided
         after authenticating the user's credentials.
         """
-        user_id = getattr(user, api_settings.USER_ID_FIELD)
+        user_id = getattr(user, USER_ID_FIELD)
         if not isinstance(user_id, int):
             user_id = str(user_id)
 
         token = cls()
-        token[api_settings.USER_ID_CLAIM] = user_id
+        token[USER_ID_CLAIM] = user_id
 
         return token
-
-    _token_backend = None
-
-    @property
-    def token_backend(self):
-        if self._token_backend is None:
-            self._token_backend = import_string(
-                "rest_framework_simplejwt.state.token_backend"
-            )
-        return self._token_backend
-
-    def get_token_backend(self):
-        # Backward compatibility.
-        return self.token_backend
 
 
 class BlacklistMixin:
