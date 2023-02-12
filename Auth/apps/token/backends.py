@@ -49,9 +49,9 @@ class TokenBackend:
 
         # secret keys
         rsa = RsaKey.objects.filter(active=True)
-        if rsa.count() != 1:
+        if not rsa:
             return None
-        pem_private_key = rsa.private.tobytes()
+        pem_private_key = rsa[0].private.tobytes()
         # pem_public_key = rsa.public.tobytes()
 
         # generate secret key
@@ -64,6 +64,8 @@ class TokenBackend:
         if self.issuer is not None:
             jwt_payload["iss"] = self.issuer
         access_token = pyseto.encode(secret_key, payload=jwt_payload)
+
+        print(access_token)
 
         return access_token
 
