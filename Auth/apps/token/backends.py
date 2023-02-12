@@ -1,12 +1,13 @@
 import json
 import pyseto
-from datetime import timedelta
 from typing import Union
+from datetime import timedelta
+
+from django.utils.translation import gettext_lazy as _
 
 from apps.token.models import RsaKey
-from django.utils.translation import gettext_lazy as _
-from .exceptions import TokenBackendError
-from .utils import format_lazy
+from apps.token.utils import format_lazy
+from apps.token.exceptions import TokenBackendError
 
 
 
