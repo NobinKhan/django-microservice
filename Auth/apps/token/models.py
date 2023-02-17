@@ -52,6 +52,7 @@ class AuthToken(BaseModel):
     user = models.ForeignKey(User, related_name="auth_token", on_delete=models.CASCADE, null=True, blank=True, editable=False)
     access_token = models.BinaryField(verbose_name='Access Token', editable=False, unique=True, null=True, blank=True)
     exp = models.DateTimeField(default=(timezone.now()+timezone.timedelta(hours=24)), editable=False)
+    jti = models.CharField(unique=True, max_length=255, editable=False, null=True, blank=True)
     is_valid = models.BooleanField(default=False, null=True, blank=True)
     payload = models.JSONField(null=True, blank=True, editable=False)
     

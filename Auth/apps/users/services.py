@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from phonenumber_field.phonenumber import PhoneNumber
 from apps.common.services import model_update
-from apps.users.models import User
+from apps.users.models import User, OTPtoken
 
 
 def create_user(*, phone: PhoneNumber = None, username: str = None, email: str = None, is_active: bool = False, is_staff: bool = False, password: Optional[str] = None,  **extra_fields) -> User:
@@ -50,3 +50,7 @@ def user_update(*, user: User, data) -> User:
     # ... some additional tasks with the user ...
 
     return user
+
+def create_otp(perpose: str, user: User = None):
+    otp = OTPtoken(perpose=perpose, user=user)
+    otp.save()

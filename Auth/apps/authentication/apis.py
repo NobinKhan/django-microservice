@@ -10,6 +10,41 @@ from apps.authentication.services import auth_logout
 from apps.users.selectors import user_get_login_data
 
 
+class SendOTP(APIView):
+    def get(self, request):
+        # Verifying request
+        phone = request.query_params.get('phone')
+        if not phone:
+            return Response({"error":"'phone' param is required. It can't be empty or null."}, status=status.HTTP_404_NOT_FOUND)
+        
+        error, phone, error_code = verify_phone(phone=phone.replace(" ", "+"))
+        if error:
+            return Response({"error":phone}, status=error_code)
+        
+        error, user, error_code = verify_user(phone=phone)
+        if error:
+            return Response({"error":user}, status=error_code)
+        if user.is_deleted:
+            return Response({"error":"User Not Found With The Given Phone Number"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Time limite to send OTP again
+        old_otp = OTPtoken.objects.filter(user=user)
+        if old_otp:
+            difference = timezone.now() - old_otp[0].created
+            if difference.total_seconds() < 60:
+                return Response({"message": f"Please wait {int(60-difference.total_seconds()+2)} seconds to get another OTP"}, status=status.HTTP_204_NO_CONTENT)
+
+        # Sending OTP Code
+        if user.is_active:
+            saving_otp_token(type='Login', user=user)
+        else:
+            saving_otp_token(type='Register', user=user)
+        return Response({"message": f"OTP verification code sent to this {user.phone} number."}, status=status.HTTP_202_ACCEPTED)
+
+
+
+'''
+
 class UserSessionLoginApi(APIView):
     """
     Following https://docs.djangoproject.com/en/3.1/topics/auth/default/#how-to-log-a-user-in
@@ -77,3 +112,5 @@ class UserMeApi(ApiAuthMixin, APIView):
         data = user_get_login_data(user=request.user)
 
         return Response(data)
+
+'''
