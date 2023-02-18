@@ -63,10 +63,7 @@ class TokenBackend:
             jwt_payload["aud"] = self.audience
         if self.issuer is not None:
             jwt_payload["iss"] = self.issuer
-        access_token = pyseto.encode(secret_key, payload=jwt_payload)
-
-        print(access_token)
-
+        access_token = pyseto.encode(secret_key, payload=jwt_payload).decode().removeprefix('v4.public.')
         return access_token
 
     def decode(self, token, verify=True):

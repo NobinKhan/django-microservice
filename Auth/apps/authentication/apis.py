@@ -1,13 +1,16 @@
 from django.conf import settings
+from django.utils.module_loading import import_string
+from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
-from rest_framework import serializers, status
+from rest_framework import serializers, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.views import ObtainJSONWebTokenView
 
-from apps.api.mixins import ApiAuthMixin
-from apps.authentication.services import auth_logout
-from apps.users.selectors import user_get_login_data
+from apps.users.models import OTPtoken
+from apps.token.authentication import AUTH_HEADER_TYPES
+from apps.token.exceptions import InvalidToken, TokenError
+from apps.authentication.serializers import Output_AT_Serializer
+from apps.authentication.services import verify_phone, verify_user, saving_otp_token
 
 
 class SendOTP(APIView):
@@ -36,10 +39,50 @@ class SendOTP(APIView):
 
         # Sending OTP Code
         if user.is_active:
-            saving_otp_token(type='Login', user=user)
+            saving_otp_token(perpose=OTPtoken.Perpose.LOGIN, user=user)
         else:
-            saving_otp_token(type='Register', user=user)
+            saving_otp_token(perpose=OTPtoken.Perpose.REGISTER, user=user)
         return Response({"message": f"OTP verification code sent to this {user.phone} number."}, status=status.HTTP_202_ACCEPTED)
+
+
+class Login(generics.GenericAPIView):
+    serializer_class = Output_AT_Serializer
+    permission_classes = ()
+    authentication_classes = ()
+
+    # _serializer_class = api_settings.TOKEN_OBTAIN_SERIALIZER
+
+    www_authenticate_realm = "api"
+
+    def get_serializer_class(self):
+        """
+        If serializer_class is set, use it directly. Otherwise get the class from settings.
+        """
+
+        if self.serializer_class:
+            return self.serializer_class
+        # try:
+        #     return import_string(self._serializer_class)
+        # except ImportError:
+        #     msg = "Could not import serializer '%s'" % self._serializer_class
+        #     raise ImportError(msg)
+
+    def get_authenticate_header(self, request):
+        return '{} realm="{}"'.format(
+            AUTH_HEADER_TYPES[0],
+            self.www_authenticate_realm,
+        )
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
 
 
 
