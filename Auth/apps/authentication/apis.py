@@ -31,11 +31,11 @@ class SendOTP(APIView):
             return Response({"error":"User Not Found With The Given Phone Number"}, status=status.HTTP_404_NOT_FOUND)
         
         # Time limite to send OTP again
-        old_otp = OTPtoken.objects.filter(user=user)
+        old_otp = OTPtoken.objects.filter(user=user).last()
         if old_otp:
-            difference = timezone.now() - old_otp[0].created
-            if difference.total_seconds() < 60:
-                return Response({"message": f"Please wait {int(60-difference.total_seconds()+2)} seconds to get another OTP"}, status=status.HTTP_204_NO_CONTENT)
+            difference = timezone.now() - old_otp.created_at
+            if difference.total_seconds() < 61:
+                return Response({"message": f"Please wait {int(60-difference.total_seconds()+1)} seconds to get another OTP"}, status=status.HTTP_204_NO_CONTENT)
 
         # Sending OTP Code
         if user.is_active:
