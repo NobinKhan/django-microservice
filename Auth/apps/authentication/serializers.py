@@ -63,11 +63,11 @@ class Output_AT_Serializer(serializers.Serializer):
         if otp_obj.perpose == OTPtoken.Perpose.OTHER:
             otp_obj.is_used = True
             otp_obj.save()
-        elif otp_obj.perpose == OTPtoken.Perpose.REGISTER and otp_obj.user.phone == self.user.phone:
+        elif otp_obj.perpose == OTPtoken.Perpose.REGISTER and otp_obj.user.phone == self.user.phone and self.user.is_active == False:
             self.user.is_active = True
             self.user.save()
             otp_obj.delete()
-        elif otp_obj.perpose == OTPtoken.Perpose.LOGIN and otp_obj.user.phone == self.user.phone:
+        elif otp_obj.perpose == OTPtoken.Perpose.LOGIN and otp_obj.user.phone == self.user.phone and self.user.is_active == True:
             otp_obj.delete()
         else:
             raise ValidationError({

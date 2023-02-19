@@ -170,7 +170,7 @@ class Profile(BaseModel):
         GOLD = 'Gold'
         PLATINUM = 'Platinum'
 
-    user = models.OneToOneField(User, related_name="profile", on_delete=models.PROTECT, null=True, blank=True)
+    user = models.OneToOneField(User, related_name="profile", on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(_('name'), max_length=150, blank=True, null=True)
     date_of_birth = models.DateField(verbose_name=_("Date of birth"), null=True, blank=True)
     gender = models.CharField(verbose_name=_("Gender"), max_length=20, choices=Gender.choices, default=Gender.NONE, null=True, blank=True)
