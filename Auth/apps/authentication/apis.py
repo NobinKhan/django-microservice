@@ -27,7 +27,7 @@ class SendOTP(APIView):
         error, user, error_code = verify_user(phone=phone)
         if error:
             return Response({"error":user}, status=error_code)
-        if user.is_deleted:
+        if user.is_deleted or not user.is_active:
             return Response({"error":"User Not Found With The Given Phone Number"}, status=status.HTTP_404_NOT_FOUND)
         
         # Time limite to send OTP again
