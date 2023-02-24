@@ -1,15 +1,16 @@
 from django.urls import include, path
 
 from apps.authentication.apis import (
+    SendOTP,
     Login,
-    SendOTP
+    Register,
 )
 
 urlpatterns = [
-    path("me/", SendOTP.as_view(), name="otp"),
     path("",include(([
-        path("login/", Login.as_view(), name="login")
-        # path("logout/", UserSessionLogoutApi.as_view(), name="logout")
+        path("register/", Register.as_view(), name="register"),
+        path("login/", Login.as_view(), name="login"),
+        path("send_otp/", SendOTP.as_view(), name="send_otp")
     ,],"session",)),),
 
     # path("jwt/",include(([

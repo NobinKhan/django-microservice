@@ -158,9 +158,7 @@ class Profile(BaseModel):
         OTHER = 'Other', _('Other')
     
     class AccountStatus(models.TextChoices):
-        NEW_CREATED = 'NewCreated', _('Newly Created Account')
-        DELETED = 'Deleted', _('Account Deleted')
-        RE_OPENED = 'ReOpened', _('Account Created Again')
+        NEW = 'New', _('New Account')
         BANNED = 'Banned', _('Banned Account')
 
     class Membership(models.TextChoices):
@@ -176,20 +174,10 @@ class Profile(BaseModel):
     gender = models.CharField(verbose_name=_("Gender"), max_length=20, choices=Gender.choices, default=Gender.NONE, null=True, blank=True)
     photo = models.FileField(verbose_name=_("Photo"), upload_to=userDirectoryPath, default='photos/default-user-avatar.png', null=True, blank=True)
     membership = models.CharField(verbose_name=_("Membership"), max_length=50, default=Membership.NORMAL, choices=Membership.choices, null=True, blank=True)
-
     total_spend_amount = models.FloatField(verbose_name=_("Total Spend Amount"), default=0, null=True, blank=True)
     point_used = models.FloatField(verbose_name=_("Point Used"), default=0, null=True, blank=True)
     current_point = models.FloatField(verbose_name=_("Current Point"), default=0, null=True, blank=True)
-
-    status = models.CharField(verbose_name=_("User Status"), max_length=10, default=AccountStatus.NEW_CREATED, choices=AccountStatus.choices, null=True, blank=True)
-    is_deleted = models.BooleanField(
-        _('Deleted Account'),
-        default=False,
-        help_text=_(
-            "If user deleted than this field will change to True, but reopen account won\'t change anything. "
-        ),
-        null=True, blank=True
-    )
+    status = models.CharField(verbose_name=_("User Status"), max_length=10, default=AccountStatus.NEW, choices=AccountStatus.choices, null=True, blank=True)
 
 
     class Meta:

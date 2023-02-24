@@ -47,7 +47,7 @@ class UserAdmin(UA):
 
         ('Login Info', {
             'classes': ('wide',),
-            'fields': ('username','phone', 'is_active', 'is_staff', 'is_deleted')
+            'fields': ('username','phone', 'is_active', 'is_staff')
         }),
         ('Personal Info', {
             'classes': ('wide',),

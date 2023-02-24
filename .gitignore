@@ -17,3 +17,4 @@ static
 Auth/.env
 Auth/poetry.lock
 Auth/check.py
+*/poetry.lock

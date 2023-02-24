@@ -27,7 +27,7 @@ class PasswordField(serializers.CharField):
         super().__init__(*args, **kwargs)
 
 
-class Output_AT_Serializer(serializers.Serializer):
+class OutputAccessTokenSerializer(serializers.Serializer):
     """
     Output Access Token For Users.
     You Can Only Get Access Token For Active Users.
@@ -55,7 +55,6 @@ class Output_AT_Serializer(serializers.Serializer):
     def verify_otp(self):
         # otp_obj = get_object(OTPtoken, user=self.user, is_used=False)
         otp_obj = OTPtoken.objects.filter(user=self.user, is_used=False).last()
-        print(otp_obj)
         if not otp_obj:
             otp_obj = get_object(OTPtoken, token=self.initial_data.get('token'), is_used=False)
         if not otp_obj:

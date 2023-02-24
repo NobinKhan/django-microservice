@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from apps.users.models import OTPtoken
 from apps.token.authentication import AUTH_HEADER_TYPES
 from apps.token.exceptions import InvalidToken, TokenError
-from apps.authentication.serializers import Output_AT_Serializer
+from apps.authentication.serializers import OutputAccessTokenSerializer
 from apps.authentication.services import verify_phone, verify_user, saving_otp_token
 
 
@@ -46,7 +46,7 @@ class SendOTP(APIView):
 
 
 class Login(generics.GenericAPIView):
-    serializer_class = Output_AT_Serializer
+    serializer_class = OutputAccessTokenSerializer
     permission_classes = ()
     authentication_classes = ()
 
@@ -72,6 +72,19 @@ class Login(generics.GenericAPIView):
             AUTH_HEADER_TYPES[0],
             self.www_authenticate_realm,
         )
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+
+class Register(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
